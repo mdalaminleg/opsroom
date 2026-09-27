@@ -526,4 +526,10 @@
     closeSidebar,
     boot,
   });
+
+  // Every page's inline script calls el(...) as a bare global (not Ops.el(...)),
+  // 250+ call sites across dashboard/subject/chapter/finals/mock-test/settings/
+  // index. Rather than edit every page, expose the one helper they actually
+  // rely on as a real global too. (Nothing else is called bare — only this one.)
+  window.el = el;
 })();
