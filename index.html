@@ -158,6 +158,18 @@
 
     const slot = document.getElementById("auth-slot");
 
+    // Reveal the page no matter which code path below runs (or fails).
+    // This MUST be wired up before any early return, or the body can be
+    // left permanently invisible — a solid black screen.
+    function reveal() {
+      document.body.style.visibility = "visible";
+    }
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(reveal, 0);
+    } else {
+      document.addEventListener("DOMContentLoaded", reveal);
+    }
+
     // If already logged in, skip straight into the app.
     // We don't block on server verification — a present token gets us in;
     // core.js's requireAuth() will redirect out if the token turns out bad.
@@ -344,15 +356,8 @@
     }
 
     // Ops.boot() is NOT called on this page — this page is intentionally
-    // unauthenticated. Reveal the body now that layout is ready.
-    function reveal() {
-      document.body.style.visibility = "visible";
-    }
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-      setTimeout(reveal, 0);
-    } else {
-      document.addEventListener("DOMContentLoaded", reveal);
-    }
+    // unauthenticated. (reveal() is wired up near the top of this function,
+    // before the early return, so it always fires.)
   })();
   </script>
 </body>
