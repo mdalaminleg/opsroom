@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+  <title>Subject · Ops Room</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    /* ── subject-scoped ────────────────────────────────────────────────────── */
+    .subj-hero {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .subj-hero .names {
+      min-width: 0;
+    }
+    .subj-hero .name-en {
+      font-family: var(--font-heading);
+      font-size: clamp(26px, 6vw, 36px);
+      font-weight: 600;
+      line-height: 1.1;
+      margin: 0 0 4px;
+    }
+    .subj-hero .name-bn {
+      font-size: 14px;
+      color: var(--gray2);
+      line-height: 1.55;
+    }
+    .subj-hero .pct-big {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(34px, 9vw, 52px);
+      line-height: 1;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+    .subj-hero .pct-big .pct {
+      font-size: 0.5em;
+      color: var(--gray);
+      margin-left: 2px;
+    }
+    .subj-hero .pct-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray);
+      text-align: right;
+    }
+
+    .subj-progress {
+      margin-bottom: 24px;
+    }
+
+    /* paper switcher — reuses .tabs */
+    .tabs {
+      margin-bottom: 16px;
+    }
+
+    /* paper header inside the active tab */
+    .paper-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .paper-head .paper-title {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0;
+    }
+    .paper-head .paper-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+    .paper-head .paper-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .paper-head .paper-actions .btn {
+      min-height: 40px;
+      padding: 0 12px;
+      font-size: 13px;
+    }
+
+    /* chapter row status ring — compact 4-stage summary */
+    .stage-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+    .stage-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+    }
+    .stage-dot.on {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .stage-dot.partial {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    /* Back link at top of page */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray2);
+      margin-bottom: 12px;
+      transition: color var(--transition);
+    }
+    .back-link:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body data-page="subjects" class="booting">
+
+  <main class="app-content" id="app-view">
+    <div class="dash-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;color:var(--gray);">
+      <div class="spinner" aria-hidden="true"></div>
+      <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        Loading subject…
+      </div>
+    </div>
+  </main>
+
+  <script src="/syllabus.js"></script>
+  <script src="/core.js"></script>
+  <script src="/shared.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    const view = document.getElementById("app-view");
+
+    if (!Ops.boot()) return;
+
+    // ── resolve subject ─────────────────────────────────────────────────────
+    const subjectId = Ops.qs("id");
+    const subject = subjectId ? Ops.findSubject(subjectId) : null;
+
+    if (!subject) {
+      renderNotFound();
+      return;
+    }
+
+    // Remember this as last-opened (so Continue on dashboard comes back here).
+    Ops.rememberOpened(subject.id, "subject");
+
+    // Track active tab in the URL, so refresh keeps the paper.
+    const params = new URLSearchParams(location.search);
+    let activePaperId = params.get("paper");
+    if (!activePaperId || !subject.papers.some((p) => p.id === activePaperId)) {
+      activePaperId = subject.papers[0] ? subject.papers[0].id : null;
+    }
+
+    render();
+
+    // ── render ──────────────────────────────────────────────────────────────
+    function render() {
+      view.innerHTML = "";
+
+      const back = el("a", { class: "back-link", href: "dashboard.html#subjects" });
+      back.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>`;
+      back.appendChild(el("span", { text: "Back to dashboard" }));
+      view.appendChild(back);
+
+      view.appendChild(heroBlock());
+      view.appendChild(tabsBlock());
+
+      if (activePaperId) {
+        const paper = subject.papers.find((p) => p.id === activePaperId);
+        if (paper) view.appendChild(paperBlock(paper));
+      } else {
+        view.appendChild(
+          el("div", {
+            class: "state",
+            html: `<div class="state-title">No papers yet</div>
+                   <div class="state-body">This subject has no papers. Add one from Settings.</div>`,
+          })
+        );
+      }
+    }
+
+    // ── hero ────────────────────────────────────────────────────────────────
+    function heroBlock() {
+      const stats = Ops.getSubjectStats(subject.id);
+
+      const hero = el("section", { class: "subj-hero" });
+
+      const names = el("div", { class: "names" });
+      names.appendChild(el("h1", { class: "name-en", text: subject.name }));
+      if (subject.nameBn && subject.nameBn !== subject.name) {
+        names.appendChild(el("div", { class: "name-bn bn", text: subject.nameBn }));
+      }
+      hero.appendChild(names);
+
+      const pctWrap = el("div", { style: "text-align:right;min-width:120px;" });
+      const big = el("div", { class: "pct-big tnum" });
+      big.appendChild(document.createTextNode(String(stats.pct)));
+      big.appendChild(el("span", { class: "pct", text: "%" }));
+      pctWrap.appendChild(big);
+      pctWrap.appendChild(
+        el("div", {
+          class: "pct-meta",
+          text: `${stats.done} / ${stats.total} done`,
+        })
+      );
+      hero.appendChild(pctWrap);
+
+      const wrap = el("div");
+      wrap.appendChild(hero);
+
+      const prog = el("div", { class: "subj-progress" });
+      prog.appendChild(Ops.progressBar(stats.pct));
+      wrap.appendChild(prog);
+
+      return wrap;
+    }
+
+    // ── tabs (paper switcher) ───────────────────────────────────────────────
+    function tabsBlock() {
+      const tabs = el("div", { class: "tabs", role: "tablist" });
+
+      for (const p of subject.papers) {
+        const stats = Ops.getPaperStats(p.id);
+        const tab = el("button", {
+          class: "tab" + (p.id === activePaperId ? " active" : ""),
+          type: "button",
+          role: "tab",
+          "aria-selected": p.id === activePaperId ? "true" : "false",
+        });
+        tab.appendChild(el("span", { text: p.name }));
+        const cnt = el("span", {
+          class: "mono",
+          style: "color:var(--gray);font-size:11px;",
+          text: `${stats.done}/${stats.total}`,
+        });
+        tab.appendChild(cnt);
+        tab.addEventListener("click", () => {
+          if (p.id === activePaperId) return;
+          activePaperId = p.id;
+
+          const url = new URL(location.href);
+          url.searchParams.set("paper", p.id);
+          history.replaceState(null, "", url.toString());
+
+          render();
+        });
+        tabs.appendChild(tab);
+      }
+
+      return tabs;
+    }
+
+    // ── paper block ─────────────────────────────────────────────────────────
+    function paperBlock(paper) {
+      const wrap = el("div");
+
+      const stats = Ops.getPaperStats(paper.id);
+      const finalDone = Ops.isPaperFinalComplete(paper.id);
+
+      // head row: title + meta on left, actions on right
+      const head = el("div", { class: "paper-head" });
+
+      const titleWrap = el("div", { style: "min-width:0;" });
+      const titleRow = el("div", { style: "display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;" });
+      titleRow.appendChild(el("h2", { class: "paper-title", text: paper.name }));
+      if (paper.nameBn && paper.nameBn !== paper.name) {
+        titleRow.appendChild(
+          el("span", { class: "muted2 bn", style: "font-size:13px;", text: paper.nameBn })
+        );
+      }
+      titleWrap.appendChild(titleRow);
+
+      const meta = el("div", { class: "paper-meta", text: `${stats.done} of ${stats.total} chapters complete` });
+      titleWrap.appendChild(meta);
+      head.appendChild(titleWrap);
+
+      const actions = el("div", { class: "paper-actions" });
+
+      const finalBtn = el("a", {
+        class: "btn " + (finalDone ? "btn-ghost" : "btn-primary"),
+        href: `finals.html?paper=${encodeURIComponent(paper.id)}`,
+      });
+      finalBtn.innerHTML = Ops.icon("final", 16);
+      finalBtn.appendChild(el("span", { text: finalDone ? "Paper Final ✓" : "Open Paper Final" }));
+      actions.appendChild(finalBtn);
+
+      head.appendChild(actions);
+      wrap.appendChild(head);
+
+      // chapter list
+      if (!paper.chapters || paper.chapters.length === 0) {
+        wrap.appendChild(
+          el("div", {
+            class: "state",
+            html: `<div class="state-title">No chapters yet</div>
+                   <div class="state-body">This paper has no chapters. Add one from Settings.</div>`,
+          })
+        );
+        return wrap;
+      }
+
+      const list = el("div", { class: "chapter-list" });
+      paper.chapters.forEach((c, i) => {
+        list.appendChild(chapterRow(c, i + 1));
+      });
+      wrap.appendChild(list);
+
+      return wrap;
+    }
+
+    // ── chapter row ─────────────────────────────────────────────────────────
+    function chapterRow(chapter, idx) {
+      const p = Ops.getChapterProgress(chapter.id);
+      const done = Ops.isChapterComplete(chapter.id);
+
+      const row = el("a", {
+        class: "chapter-row",
+        href: `chapter.html?id=${encodeURIComponent(chapter.id)}`,
+      });
+
+      row.appendChild(el("div", { class: "cr-idx tnum", text: String(idx) }));
+
+      const body = el("div", { class: "cr-body" });
+      body.appendChild(el("div", { class: "cr-name bn", text: chapter.name }));
+
+      // small status line: "3 of 4 stages done" — very light, just enough signal
+      const stagesDone =
+        (p.theory ? 1 : 0) +
+        (p.revision >= 1 ? 1 : 0) +
+        (p.qb >= 1 ? 1 : 0) +
+        (p.exam ? 1 : 0);
+      body.appendChild(
+        el("div", {
+          class: "cr-sub",
+          text: done ? "Complete" : `${stagesDone} of 4 stages`,
+        })
+      );
+      row.appendChild(body);
+
+      // four tiny dots: theory / revision / qb / exam
+      const dots = el("div", { class: "stage-dots", "aria-hidden": "true" });
+      dots.appendChild(stageDot(p.theory ? "on" : ""));
+      dots.appendChild(stageDot(p.revision >= 1 ? "on" : ""));
+      dots.appendChild(stageDot(p.qb >= 1 ? "on" : ""));
+      dots.appendChild(stageDot(p.exam ? "on" : ""));
+      row.appendChild(dots);
+
+      // check ring
+      const check = el("div", {
+        class: "cr-check" + (done ? " done" : ""),
+      });
+      if (done) check.innerHTML = Ops.icon("check", 14);
+      row.appendChild(check);
+
+      return row;
+    }
+
+    function stageDot(kind) {
+      return el("span", { class: "stage-dot" + (kind ? " " + kind : "") });
+    }
+
+    // ── not found ───────────────────────────────────────────────────────────
+    function renderNotFound() {
+      view.innerHTML = "";
+      const back = el("a", { class: "back-link", href: "dashboard.html" });
+      back.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>`;
+      back.appendChild(el("span", { text: "Back to dashboard" }));
+      view.appendChild(back);
+
+      view.appendChild(
+        el("div", {
+          class: "state",
+          html: `
+            <div class="state-title">Subject not found</div>
+            <div class="state-body">That subject doesn't exist — it may have been removed.</div>
+          `,
+        })
+      );
+
+      const actions = el("div", { style: "margin-top: 16px; text-align:center;" });
+      const a = el("a", { class: "btn btn-primary", href: "dashboard.html#subjects" });
+      a.appendChild(el("span", { text: "Go to subjects" }));
+      actions.appendChild(a);
+      view.appendChild(actions);
+    }
+  })();
+  </script>
+</body>
+</html>
