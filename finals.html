@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+  <title>Finals · Ops Room</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    /* ── finals-scoped ─────────────────────────────────────────────────────── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray2);
+      margin-bottom: 12px;
+      transition: color var(--transition);
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .fin-head {
+      margin-bottom: 22px;
+    }
+    .fin-head .crumb {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--gray);
+      margin-bottom: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .fin-head .crumb a {
+      color: var(--gray2);
+      transition: color var(--transition);
+    }
+    .fin-head .crumb a:hover { color: var(--accent); }
+    .fin-head .crumb .sep { color: var(--gray); opacity: 0.6; }
+    .fin-head h1 {
+      font-size: clamp(22px, 5.5vw, 32px);
+      line-height: 1.2;
+      margin: 0 0 6px;
+      font-weight: 600;
+    }
+    .fin-head .sub {
+      font-size: 13px;
+      color: var(--gray2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* kind switcher — Paper Final vs Subject Final (only when both are valid) */
+    .kind-tabs {
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      margin-bottom: 18px;
+    }
+    .kind-tab {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray2);
+      transition: background var(--transition), color var(--transition);
+    }
+    .kind-tab:hover { color: var(--white); }
+    .kind-tab.active {
+      background: var(--surface3);
+      color: var(--accent);
+    }
+    .kind-tab .count {
+      margin-left: 8px;
+      color: var(--gray);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* status block — same language as chapter.html */
+    .fin-status {
+      margin: 0 0 22px;
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .fin-status.complete {
+      border-color: rgba(16, 212, 142, 0.45);
+      background: linear-gradient(180deg, var(--green-dim), var(--surface));
+    }
+    .fin-status .fs-ring {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      flex: 0 0 auto;
+      transition: color var(--transition), border-color var(--transition),
+        background var(--transition);
+    }
+    .fin-status.complete .fs-ring {
+      background: var(--green-dim);
+      border-color: rgba(16, 212, 142, 0.55);
+      color: var(--green);
+    }
+    .fin-status .fs-body { flex: 1 1 auto; min-width: 0; }
+    .fin-status .fs-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 2px;
+      color: var(--white);
+    }
+    .fin-status .fs-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray);
+    }
+
+    /* counter rows */
+    .fin-counter {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .fin-counter + .fin-counter { margin-top: 10px; }
+    .fin-counter.done {
+      border-color: rgba(16, 212, 142, 0.35);
+      background: linear-gradient(180deg, rgba(16, 212, 142, 0.03), var(--surface));
+    }
+    .fin-counter .fc-body {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .fin-counter .fc-title {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 2px;
+    }
+    .fin-counter .fc-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      letter-spacing: 0.02em;
+    }
+    .fin-counter .fc-status {
+      flex: 0 0 auto;
+      color: var(--gray);
+    }
+    .fin-counter.done .fc-status { color: var(--green); }
+
+    /* underlying chapter review (collapsed list) */
+    .review {
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .review-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .review-head h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .review-head .count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      letter-spacing: 0.04em;
+    }
+    .review-head .chev {
+      color: var(--gray);
+      transition: transform var(--transition);
+    }
+    .review-head.open .chev { transform: rotate(180deg); }
+    .review-body {
+      border-top: 1px solid var(--border);
+      padding: 12px 16px 16px;
+    }
+    .review-body.hidden { display: none; }
+
+    .mini-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mini-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 2px;
+      font-size: 13.5px;
+    }
+    .mini-row .mr-name {
+      flex: 1 1 auto;
+      min-width: 0;
+      color: var(--white);
+      word-break: break-word;
+    }
+    .mini-row .mr-idx {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      min-width: 22px;
+      font-variant-numeric: tabular-nums;
+    }
+    .mini-row .mr-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--gray);
+      flex: 0 0 auto;
+    }
+    .mini-row .mr-check.done {
+      background: var(--green-dim);
+      border-color: rgba(16, 212, 142, 0.55);
+      color: var(--green);
+    }
+
+    .fin-actions {
+      margin-top: 22px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .fin-actions .btn { flex: 1 1 auto; min-width: 160px; }
+
+    @media (max-width: 520px) {
+      .fin-counter {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .fin-counter .fc-status { align-self: flex-start; }
+    }
+  </style>
+</head>
+<body data-page="paper-finals" class="booting">
+
+  <main class="app-content" id="app-view">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;color:var(--gray);">
+      <div class="spinner" aria-hidden="true"></div>
+      <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        Loading final…
+      </div>
+    </div>
+  </main>
+
+  <script src="/syllabus.js"></script>
+  <script src="/core.js"></script>
+  <script src="/shared.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    const view = document.getElementById("app-view");
+
+    if (!Ops.boot()) return;
+
+    // ── resolve scope ───────────────────────────────────────────────────────
+    // ?paper=<id>  → Paper Final
+    // ?subject=<id> → Subject Final
+    // ?subject=<id>&paper=<id> → show subject final, but offer a Paper tab too
+    // If neither given, default to first subject's subject final.
+    const urlPaper = Ops.qs("paper");
+    const urlSubject = Ops.qs("subject");
+
+    let kind = urlPaper && !urlSubject ? "paper" : urlSubject ? "subject" : null;
+    let paper = urlPaper ? Ops.findPaper(urlPaper) : null;
+    let subject = urlSubject ? Ops.findSubject(urlSubject) : null;
+
+    // Fill in the missing side from the other.
+    if (paper && !subject) subject = Ops.findSubject(paper.subjectId);
+    if (subject && !paper && kind === "paper") {
+      paper = subject.papers[0] || null;
+    }
+    if (!kind) {
+      const first = Ops.getMergedSyllabus()[0];
+      if (first) {
+        subject = first;
+        kind = "subject";
+      }
+    }
+
+    if (!subject && !paper) {
+      renderNotFound();
+      return;
+    }
+
+    // Remember last opened (this page is either a paper final or subject final).
+    if (kind === "paper" && paper) Ops.rememberOpened(paper.id, "paperFinal");
+    else if (kind === "subject" && subject) Ops.rememberOpened(subject.id, "subjectFinal");
+
+    // Live refs (repaint in place on counter changes)
+    let statusHost = null;
+    let counterRows = {}; // { recall: rowEl, qb: rowEl, exam: rowEl }
+    let wasComplete = kind === "paper" && paper
+      ? Ops.isPaperFinalComplete(paper.id)
+      : subject ? Ops.isSubjectFinalComplete(subject.id) : false;
+
+    // Whether to render the Paper↔Subject switcher
+    const canSwitch = !!(subject && paper);
+
+    render();
+
+    // ── render ──────────────────────────────────────────────────────────────
+    function render() {
+      view.innerHTML = "";
+
+      view.appendChild(backLink());
+
+      if (canSwitch) view.appendChild(kindSwitcher());
+
+      view.appendChild(headBlock());
+
+      statusHost = document.createElement("div");
+      view.appendChild(statusHost);
+      paintStatus();
+
+      view.appendChild(countersBlock());
+      view.appendChild(reviewBlock());
+
+      view.appendChild(actionsBlock());
+    }
+
+    function backLink() {
+      // Paper Final → back to its subject page, that paper's tab.
+      // Subject Final → back to the subject page.
+      let href = "dashboard.html";
+      let label = "Back to dashboard";
+      if (kind === "paper" && paper && subject) {
+        href = `subject.html?id=${encodeURIComponent(subject.id)}&paper=${encodeURIComponent(paper.id)}`;
+        label = `Back to ${paper.name}`;
+      } else if (subject) {
+        href = `subject.html?id=${encodeURIComponent(subject.id)}`;
+        label = `Back to ${subject.name}`;
+      }
+      const a = el("a", { class: "back-link", href });
+      a.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>`;
+      a.appendChild(el("span", { text: label }));
+      return a;
+    }
+
+    function kindSwitcher() {
+      const wrap = el("div", { class: "kind-tabs", role: "tablist" });
+
+      const paperTab = el("a", {
+        class: "kind-tab" + (kind === "paper" ? " active" : ""),
+        href: `finals.html?paper=${encodeURIComponent(paper.id)}&subject=${encodeURIComponent(subject.id)}`,
+        role: "tab",
+      });
+      paperTab.appendChild(el("span", { text: "Paper Final" }));
+      wrap.appendChild(paperTab);
+
+      const subjTab = el("a", {
+        class: "kind-tab" + (kind === "subject" ? " active" : ""),
+        href: `finals.html?subject=${encodeURIComponent(subject.id)}`,
+        role: "tab",
+      });
+      subjTab.appendChild(el("span", { text: "Subject Final" }));
+      wrap.appendChild(subjTab);
+
+      return wrap;
+    }
+
+    function headBlock() {
+      const wrap = el("div", { class: "fin-head" });
+
+      // breadcrumb
+      const crumb = el("div", { class: "crumb" });
+      if (subject) {
+        const sLink = el("a", {
+          href: `subject.html?id=${encodeURIComponent(subject.id)}`,
+          text: subject.name,
+        });
+        crumb.appendChild(sLink);
+        crumb.appendChild(el("span", { class: "sep", text: "›" }));
+      }
+      if (kind === "paper" && paper) {
+        const pLink = el("a", {
+          href: `subject.html?id=${encodeURIComponent(subject.id)}&paper=${encodeURIComponent(paper.id)}`,
+          text: paper.name,
+        });
+        crumb.appendChild(pLink);
+        crumb.appendChild(el("span", { class: "sep", text: "›" }));
+        crumb.appendChild(el("span", { text: "Paper Final" }));
+      } else {
+        crumb.appendChild(el("span", { text: "Subject Final" }));
+      }
+      wrap.appendChild(crumb);
+
+      // title
+      const title = kind === "paper"
+        ? `${paper ? paper.name : ""} Paper Final`.trim()
+        : `${subject ? subject.name : ""} Subject Final`.trim();
+      wrap.appendChild(el("h1", { text: title }));
+
+      // sub
+      const sub = el("div", { class: "sub" });
+      if (kind === "paper" && paper) {
+        sub.appendChild(
+          el("span", {
+            text: `${paper.chapters.length} chapter${paper.chapters.length === 1 ? "" : "s"}`,
+          })
+        );
+      } else if (subject) {
+        const totals = Ops.getSubjectStats(subject.id);
+        sub.appendChild(
+          el("span", {
+            text: `${totals.total} chapter${totals.total === 1 ? "" : "s"} across ${subject.papers.length} paper${subject.papers.length === 1 ? "" : "s"}`,
+          })
+        );
+      }
+      wrap.appendChild(sub);
+
+      return wrap;
+    }
+
+    // ── status ──────────────────────────────────────────────────────────────
+    function currentCounters() {
+      if (kind === "paper" && paper) return Ops.getPaperFinal(paper.id);
+      if (kind === "subject" && subject) return Ops.getSubjectFinal(subject.id);
+      return { recall: 0, qb: 0, exam: 0 };
+    }
+
+    function currentComplete() {
+      if (kind === "paper" && paper) return Ops.isPaperFinalComplete(paper.id);
+      if (kind === "subject" && subject) return Ops.isSubjectFinalComplete(subject.id);
+      return false;
+    }
+
+    function paintStatus() {
+      statusHost.innerHTML = "";
+
+      const c = currentCounters();
+      const done = currentComplete();
+
+      const satisfied =
+        (c.recall >= 1 ? 1 : 0) +
+        (c.qb >= 1 ? 1 : 0) +
+        (c.exam >= 1 ? 1 : 0);
+
+      const wrap = el("section", { class: "fin-status" + (done ? " complete" : "") });
+
+      const ring = el("div", { class: "fs-ring" });
+      ring.innerHTML = done ? Ops.icon("check", 22) : Ops.icon("final", 22);
+      wrap.appendChild(ring);
+
+      const body = el("div", { class: "fs-body" });
+      body.appendChild(
+        el("div", {
+          class: "fs-title",
+          text: done
+            ? kind === "paper"
+              ? "Paper final complete"
+              : "Subject final complete"
+            : "Not yet complete",
+        })
+      );
+      body.appendChild(
+        el("div", {
+          class: "fs-sub",
+          text: done
+            ? "All three counters satisfied"
+            : `${satisfied} of 3 counters satisfied`,
+        })
+      );
+      wrap.appendChild(body);
+
+      statusHost.appendChild(wrap);
+    }
+
+    // ── counters block ──────────────────────────────────────────────────────
+    function countersBlock() {
+      const wrap = el("div");
+      const c = currentCounters();
+
+      wrap.appendChild(
+        counterRow(
+          "recall",
+          "Theory + Concept + Active Recall",
+          "Count each full subject- (or paper-) wide recall pass."
+        , c.recall)
+      );
+      wrap.appendChild(
+        counterRow(
+          "qb",
+          "All Chapter QB Solve",
+          "Count each full pass through the question bank across all chapters."
+        , c.qb)
+      );
+      wrap.appendChild(
+        counterRow(
+          "exam",
+          "Exam + Error Analysis",
+          "Count each full-length exam plus its error analysis."
+        , c.exam)
+      );
+
+      return wrap;
+    }
+
+    function counterRow(field, title, helper, initial) {
+      const row = el("div", { class: "fin-counter" + (initial >= 1 ? " done" : "") });
+
+      const body = el("div", { class: "fc-body" });
+      body.appendChild(el("div", { class: "fc-title", text: title }));
+      body.appendChild(el("div", { class: "fc-sub", text: helper }));
+      row.appendChild(body);
+
+      const ctrl = Ops.counter(initial, (val) => {
+        writeCounter(field, val);
+        row.classList.toggle("done", val >= 1);
+        afterChange();
+      }, { compact: false });
+
+      // Wrap the counter + a small status glyph on the right.
+      const right = el("div", { class: "fc-status" });
+      right.appendChild(ctrl.node);
+      row.appendChild(right);
+
+      counterRows[field] = row;
+      return row;
+    }
+
+    function writeCounter(field, value) {
+      if (kind === "paper" && paper) Ops.setPaperFinalField(paper.id, field, value);
+      else if (kind === "subject" && subject) Ops.setSubjectFinalField(subject.id, field, value);
+    }
+
+    function afterChange() {
+      const done = currentComplete();
+      paintStatus();
+
+      if (done && !wasComplete) {
+        Ops.toast(
+          kind === "paper"
+            ? "Paper final complete."
+            : "Subject final complete.",
+          "success"
+        );
+      } else if (!done && wasComplete) {
+        Ops.toast(
+          kind === "paper"
+            ? "Paper final un-completed."
+            : "Subject final un-completed.",
+          "info"
+        );
+      }
+      wasComplete = done;
+
+      if (window.Ops._refreshSync) window.Ops._refreshSync();
+    }
+
+    // ── review block (underlying chapters) ──────────────────────────────────
+    function reviewBlock() {
+      const wrap = el("div", { class: "review" });
+
+      const head = el("button", { class: "review-head", type: "button" });
+      const left = el("h3", { text: kind === "paper" ? "Chapters in this paper" : "Chapters across this subject" });
+      head.appendChild(left);
+
+      const meta = el("div", { class: "row", style: "gap: 12px;" });
+      const cnt = el("span", { class: "count" });
+      const chapters = reviewChapters();
+      const doneCount = chapters.filter((c) => Ops.isChapterComplete(c.id)).length;
+      cnt.textContent = `${doneCount} of ${chapters.length} complete`;
+      meta.appendChild(cnt);
+
+      const chev = el("span", { class: "chev" });
+      chev.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+      meta.appendChild(chev);
+      head.appendChild(meta);
+
+      wrap.appendChild(head);
+
+      const body = el("div", { class: "review-body hidden" });
+      const list = el("div", { class: "mini-list" });
+      chapters.forEach((c, i) => list.appendChild(miniRow(c, i + 1)));
+      body.appendChild(list);
+      wrap.appendChild(body);
+
+      head.addEventListener("click", () => {
+        const open = head.classList.toggle("open");
+        body.classList.toggle("hidden", !open);
+      });
+
+      return wrap;
+    }
+
+    function reviewChapters() {
+      if (kind === "paper" && paper) return paper.chapters;
+      if (kind === "subject" && subject) {
+        const out = [];
+        for (const p of subject.papers) for (const c of p.chapters) out.push(c);
+        return out;
+      }
+      return [];
+    }
+
+    function miniRow(chapter, idx) {
+      const done = Ops.isChapterComplete(chapter.id);
+      const row = el("div", { class: "mini-row" });
+      row.appendChild(el("span", { class: "mr-idx", text: String(idx) }));
+      row.appendChild(el("span", { class: "mr-name bn", text: chapter.name }));
+      const chk = el("span", { class: "mr-check" + (done ? " done" : "") });
+      if (done) chk.innerHTML = Ops.icon("check", 12);
+      row.appendChild(chk);
+      return row;
+    }
+
+    // ── foot actions ────────────────────────────────────────────────────────
+    function actionsBlock() {
+      const wrap = el("div", { class: "fin-actions" });
+
+      if (subject) {
+        const a = el("a", {
+          class: "btn btn-primary",
+          href: `subject.html?id=${encodeURIComponent(subject.id)}`,
+        });
+        a.innerHTML = Ops.icon("subject", 18);
+        a.appendChild(el("span", { text: "Open subject" }));
+        wrap.appendChild(a);
+      }
+
+      const b = el("a", { class: "btn btn-ghost", href: "dashboard.html" });
+      b.innerHTML = Ops.icon("dashboard", 18);
+      b.appendChild(el("span", { text: "Dashboard" }));
+      wrap.appendChild(b);
+
+      return wrap;
+    }
+
+    // ── not found ───────────────────────────────────────────────────────────
+    function renderNotFound() {
+      view.innerHTML = "";
+      view.appendChild(
+        el("div", {
+          class: "state",
+          html: `
+            <div class="state-title">Final not found</div>
+            <div class="state-body">That paper or subject doesn't exist.</div>
+          `,
+        })
+      );
+      const actions = el("div", { style: "margin-top: 16px; text-align:center;" });
+      const a = el("a", { class: "btn btn-primary", href: "dashboard.html" });
+      a.appendChild(el("span", { text: "Back to dashboard" }));
+      actions.appendChild(a);
+      view.appendChild(actions);
+    }
+  })();
+  </script>
+</body>
+</html>
