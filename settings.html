@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#05080f" />
   <meta name="color-scheme" content="dark" />
-  <title>Full Mock Test · Ops Room</title>
+  <title>Settings · Ops Room</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,171 +16,196 @@
   <link rel="stylesheet" href="/style.css" />
 
   <style>
-    /* ── mock-scoped ───────────────────────────────────────────────────────── */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--gray2);
-      margin-bottom: 12px;
-      transition: color var(--transition);
+    /* ── settings-scoped ───────────────────────────────────────────────────── */
+    .set-section {
+      margin-bottom: 26px;
     }
-    .back-link:hover { color: var(--accent); }
-
-    .mock-head {
-      margin-bottom: 22px;
+    .set-section > h2 {
+      font-size: 20px;
+      margin: 0 0 4px;
     }
-    .mock-head .crumb {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      color: var(--gray);
-      margin-bottom: 8px;
-    }
-    .mock-head h1 {
-      font-size: clamp(22px, 5.5vw, 32px);
-      line-height: 1.2;
-      margin: 0 0 6px;
-      font-weight: 600;
-    }
-    .mock-head .sub {
+    .set-section > .desc {
       font-size: 13px;
       color: var(--gray2);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+      margin: 0 0 14px;
+      line-height: 1.55;
     }
 
-    /* status block — matches chapter/finals language */
-    .mock-status {
-      margin: 0 0 22px;
-      padding: 16px 18px;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      background: var(--surface);
+    .row-line {
       display: flex;
       align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      transition: border-color var(--transition), background var(--transition);
-    }
-    .mock-status.complete {
-      border-color: rgba(16, 212, 142, 0.45);
-      background: linear-gradient(180deg, var(--green-dim), var(--surface));
-    }
-    .mock-status .ms-ring {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 1px solid var(--border2);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--gray);
-      flex: 0 0 auto;
-      transition: color var(--transition), border-color var(--transition),
-        background var(--transition);
-    }
-    .mock-status.complete .ms-ring {
-      background: var(--green-dim);
-      border-color: rgba(16, 212, 142, 0.55);
-      color: var(--green);
-    }
-    .mock-status .ms-body { flex: 1 1 auto; min-width: 0; }
-    .mock-status .ms-title {
-      font-family: var(--font-heading);
-      font-size: 20px;
-      font-weight: 600;
-      margin: 0 0 2px;
-      color: var(--white);
-    }
-    .mock-status .ms-sub {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--gray);
-    }
-
-    /* counters */
-    .mock-counter {
-      display: flex;
-      align-items: center;
+      justify-content: space-between;
       gap: 14px;
-      padding: 16px 14px;
+      padding: 14px 16px;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       background: var(--surface);
-      transition: border-color var(--transition), background var(--transition);
+      flex-wrap: wrap;
     }
-    .mock-counter + .mock-counter { margin-top: 10px; }
-    .mock-counter.done {
-      border-color: rgba(16, 212, 142, 0.35);
-      background: linear-gradient(180deg, rgba(16, 212, 142, 0.03), var(--surface));
-    }
-    .mock-counter .mc-body { flex: 1 1 auto; min-width: 0; }
-    .mock-counter .mc-title {
+    .row-line + .row-line { margin-top: 8px; }
+    .row-line .rl-body { flex: 1 1 220px; min-width: 0; }
+    .row-line .rl-title {
       font-size: 14.5px;
       font-weight: 600;
       color: var(--white);
       margin-bottom: 2px;
     }
-    .mock-counter .mc-sub {
+    .row-line .rl-sub {
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--gray);
       letter-spacing: 0.02em;
+      line-height: 1.55;
+      word-break: break-word;
     }
-    .mock-counter .mc-ctrl { flex: 0 0 auto; }
-
-    /* info note */
-    .mock-note {
-      margin-top: 22px;
-      padding: 14px 16px;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      background: var(--surface2);
+    .row-line .rl-actions {
       display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .row-line .btn {
+      min-height: 40px;
+      padding: 0 14px;
+      font-size: 13px;
+    }
+
+    .danger-zone {
+      border-color: rgba(240, 86, 106, 0.28);
+      background: linear-gradient(180deg, var(--red-dim), var(--surface));
+    }
+    .danger-zone .rl-title { color: var(--red); }
+
+    /* custom item builder */
+    .builder {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 16px;
+    }
+    .builder + .builder { margin-top: 10px; }
+    .builder-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 12px;
-      align-items: flex-start;
+      margin-bottom: 14px;
     }
-    .mock-note .note-icon {
+    .builder-head .bt {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+    .builder-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .builder-grid .field-full {
+      grid-column: 1 / -1;
+    }
+    .builder-foot {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .builder-foot .btn {
+      min-height: 40px;
+      padding: 0 16px;
+      font-size: 13px;
+    }
+
+    /* custom list */
+    .custom-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .custom-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+    .custom-row .cr-body { flex: 1 1 auto; min-width: 0; }
+    .custom-row .cr-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      word-break: break-word;
+    }
+    .custom-row .cr-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+    .custom-row .cr-del {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
       color: var(--gray2);
+      transition: color var(--transition), background var(--transition);
       flex: 0 0 auto;
-      margin-top: 1px;
     }
-    .mock-note .note-body {
+    .custom-row .cr-del:hover {
+      color: var(--red);
+      background: var(--red-dim);
+    }
+
+    /* import preview */
+    .import-preview {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      background: var(--surface2);
+    }
+    .import-preview h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+    .import-preview ul {
+      margin: 0;
+      padding-left: 18px;
       font-size: 13px;
       color: var(--gray2);
-      line-height: 1.55;
+      line-height: 1.65;
     }
-    .mock-note .note-body strong {
+    .import-preview li .k {
       color: var(--white);
-      font-weight: 600;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
     }
 
-    @media (max-width: 520px) {
-      .mock-counter {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-      }
+    .file-input {
+      display: none;
+    }
+
+    /* two-column layout on wide screens, content + meta */
+    @media (max-width: 560px) {
+      .builder-grid { grid-template-columns: 1fr; }
+      .row-line .rl-actions { width: 100%; }
+      .row-line .rl-actions .btn { flex: 1 1 auto; }
     }
   </style>
 </head>
-<body data-page="mock-test" class="booting">
+<body data-page="settings" class="booting">
 
   <main class="app-content" id="app-view">
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;color:var(--gray);">
       <div class="spinner" aria-hidden="true"></div>
       <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
-        Loading mock test…
+        Loading settings…
       </div>
     </div>
   </main>
@@ -194,182 +219,721 @@
     "use strict";
 
     const view = document.getElementById("app-view");
-
     if (!Ops.boot()) return;
-
-    Ops.rememberOpened(null, "mockTest");
-
-    // Live refs
-    let statusHost = null;
-    let wasComplete = Ops.isMockTestComplete();
 
     render();
 
     // ── render ──────────────────────────────────────────────────────────────
     function render() {
       view.innerHTML = "";
-
-      view.appendChild(backLink());
-      view.appendChild(headBlock());
-
-      statusHost = document.createElement("div");
-      view.appendChild(statusHost);
-      paintStatus();
-
-      view.appendChild(countersBlock());
-      view.appendChild(noteBlock());
+      view.appendChild(pageHead());
+      view.appendChild(cloudSection());
+      view.appendChild(backupSection());
+      view.appendChild(customSection());
+      view.appendChild(accountSection());
+      view.appendChild(dangerSection());
     }
 
-    function backLink() {
-      const a = el("a", { class: "back-link", href: "dashboard.html" });
-      a.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>`;
-      a.appendChild(el("span", { text: "Back to dashboard" }));
-      return a;
-    }
-
-    function headBlock() {
-      const wrap = el("div", { class: "mock-head" });
-
-      wrap.appendChild(el("div", { class: "crumb", text: "Full Mock Test" }));
-      wrap.appendChild(el("h1", { text: "Full Mock Test" }));
-
-      const sub = el("div", { class: "sub" });
-      sub.appendChild(
-        el("span", {
-          text: "One global instance. Track how many full-length mock passes you've completed.",
-        })
-      );
+    function pageHead() {
+      const wrap = el("div", { class: "page-head" });
+      wrap.appendChild(el("h1", { text: "Settings" }));
+      const sub = el("p", { class: "muted", style: "margin:0;font-size:14px;" });
+      sub.textContent = "Sync, backup, custom syllabus, and account controls.";
       wrap.appendChild(sub);
-
       return wrap;
     }
 
-    // ── status ──────────────────────────────────────────────────────────────
-    function paintStatus() {
-      statusHost.innerHTML = "";
-
-      const m = Ops.getMockTest();
-      const done = Ops.isMockTestComplete();
-
-      const satisfied =
-        (m.recall >= 1 ? 1 : 0) +
-        (m.qb >= 1 ? 1 : 0) +
-        (m.exam >= 1 ? 1 : 0);
-
-      const wrap = el("section", { class: "mock-status" + (done ? " complete" : "") });
-
-      const ring = el("div", { class: "ms-ring" });
-      ring.innerHTML = done ? Ops.icon("check", 22) : Ops.icon("mock", 22);
-      wrap.appendChild(ring);
-
-      const body = el("div", { class: "ms-body" });
-      body.appendChild(
-        el("div", {
-          class: "ms-title",
-          text: done ? "Mock test complete" : "Not yet complete",
-        })
-      );
-      body.appendChild(
-        el("div", {
-          class: "ms-sub",
-          text: done
-            ? "All three counters satisfied"
-            : `${satisfied} of 3 counters satisfied`,
-        })
-      );
-      wrap.appendChild(body);
-
-      statusHost.appendChild(wrap);
-    }
-
-    // ── counters ────────────────────────────────────────────────────────────
-    function countersBlock() {
+    function sectionHead(title, desc) {
       const wrap = el("div");
-      const m = Ops.getMockTest();
+      wrap.appendChild(el("h2", { text: title }));
+      if (desc) wrap.appendChild(el("p", { class: "desc", text: desc }));
+      return wrap;
+    }
 
+    // ── cloud ───────────────────────────────────────────────────────────────
+    function cloudSection() {
+      const wrap = el("section", { class: "set-section" });
       wrap.appendChild(
-        counterRow(
-          "recall",
-          "Theory + Concept + Active Recall",
-          "Count each full-syllabus recall pass.",
-          m.recall
+        sectionHead(
+          "Cloud sync",
+          "Manual only. Nothing leaves this device until you tap Save. Restore overwrites local progress with the server copy."
         )
       );
-      wrap.appendChild(
-        counterRow(
-          "qb",
-          "All Chapter QB Solve",
-          "Count each full pass through every chapter's question bank.",
-          m.qb
-        )
+
+      const unsynced = Ops.isUnsynced();
+      const lastIso = Ops.getLastSyncedAt();
+
+      // Save row
+      const saveRow = el("div", { class: "row-line" });
+      const saveBody = el("div", { class: "rl-body" });
+      saveBody.appendChild(el("div", { class: "rl-title", text: "Save to cloud" }));
+      saveBody.appendChild(
+        el("div", {
+          class: "rl-sub",
+          text: unsynced
+            ? "You have unsynced changes."
+            : lastIso
+            ? `Last synced ${Ops.fmtTime(lastIso)}.`
+            : "No cloud copy exists yet.",
+        })
       );
-      wrap.appendChild(
-        counterRow(
-          "exam",
-          "Exam + Error Analysis",
-          "Count each full mock exam sitting plus its error analysis.",
-          m.exam
-        )
+      saveRow.appendChild(saveBody);
+
+      const saveActions = el("div", { class: "rl-actions" });
+      const saveBtn = el("button", { class: "btn btn-primary", type: "button" });
+      saveBtn.innerHTML = Ops.icon("cloud", 16);
+      saveBtn.appendChild(el("span", { text: "Save" }));
+      saveBtn.addEventListener("click", () => doSave(saveBtn));
+      saveActions.appendChild(saveBtn);
+      saveRow.appendChild(saveActions);
+      wrap.appendChild(saveRow);
+
+      // Restore row
+      const restRow = el("div", { class: "row-line" });
+      const restBody = el("div", { class: "rl-body" });
+      restBody.appendChild(el("div", { class: "rl-title", text: "Restore from cloud" }));
+      restBody.appendChild(
+        el("div", {
+          class: "rl-sub",
+          text: "Replaces your local progress with whatever's on the server.",
+        })
       );
+      restRow.appendChild(restBody);
+
+      const restActions = el("div", { class: "rl-actions" });
+      const restBtn = el("button", { class: "btn btn-ghost", type: "button" });
+      restBtn.innerHTML = Ops.icon("sync", 16);
+      restBtn.appendChild(el("span", { text: "Restore" }));
+      restBtn.addEventListener("click", () => doRestore(restBtn));
+      restActions.appendChild(restBtn);
+      restRow.appendChild(restActions);
+      wrap.appendChild(restRow);
 
       return wrap;
     }
 
-    function counterRow(field, title, helper, initial) {
-      const row = el("div", { class: "mock-counter" + (initial >= 1 ? " done" : "") });
+    async function doSave(btn) {
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = "";
+      btn.appendChild(el("span", { text: "Saving…" }));
 
-      const body = el("div", { class: "mc-body" });
-      body.appendChild(el("div", { class: "mc-title", text: title }));
-      body.appendChild(el("div", { class: "mc-sub", text: helper }));
+      try {
+        await Ops.cloudSave();
+        Ops.toast("Synced to cloud.", "success");
+        render();
+      } catch (err) {
+        Ops.toast(
+          (err && err.message) || "Cloud sync failed. Your local data is safe.",
+          "error"
+        );
+        btn.disabled = false;
+        btn.innerHTML = original;
+      }
+    }
+
+    async function doRestore(btn) {
+      const unsynced = Ops.isUnsynced();
+
+      const ok = await Ops.confirmDialog({
+        title: unsynced ? "Replace local changes?" : "Restore from cloud?",
+        body: unsynced
+          ? "You have unsynced local changes. Restoring cloud data will replace your current local state."
+          : "Your current local progress will be replaced by the cloud copy.",
+        confirmText: "Restore",
+        danger: unsynced,
+      });
+      if (!ok) return;
+
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = "";
+      btn.appendChild(el("span", { text: "Restoring…" }));
+
+      try {
+        const res = await Ops.cloudLoad();
+        if (res && res.data === null) {
+          Ops.toast("No cloud copy exists yet.", "info");
+        } else {
+          Ops.toast("Restored from cloud.", "success");
+        }
+        render();
+      } catch (err) {
+        Ops.toast((err && err.message) || "Restore failed.", "error");
+        btn.disabled = false;
+        btn.innerHTML = original;
+      }
+    }
+
+    // ── backup (export / import) ────────────────────────────────────────────
+    function backupSection() {
+      const wrap = el("section", { class: "set-section" });
+      wrap.appendChild(
+        sectionHead(
+          "Backup",
+          "Export saves a JSON file of everything. Import replaces your current state — you'll see a summary before confirming."
+        )
+      );
+
+      // Export row
+      const expRow = el("div", { class: "row-line" });
+      const expBody = el("div", { class: "rl-body" });
+      expBody.appendChild(el("div", { class: "rl-title", text: "Export progress" }));
+      expBody.appendChild(
+        el("div", { class: "rl-sub", text: "Download the full state as JSON." })
+      );
+      expRow.appendChild(expBody);
+
+      const expActions = el("div", { class: "rl-actions" });
+      const expBtn = el("button", { class: "btn btn-ghost", type: "button" });
+      expBtn.innerHTML = Ops.icon("download", 16);
+      expBtn.appendChild(el("span", { text: "Export" }));
+      expBtn.addEventListener("click", doExport);
+      expActions.appendChild(expBtn);
+      expRow.appendChild(expActions);
+      wrap.appendChild(expRow);
+
+      // Import row
+      const impRow = el("div", { class: "row-line" });
+      const impBody = el("div", { class: "rl-body" });
+      impBody.appendChild(el("div", { class: "rl-title", text: "Import progress" }));
+      impBody.appendChild(
+        el("div", { class: "rl-sub", text: "Pick a previously exported JSON file." })
+      );
+      impRow.appendChild(impBody);
+
+      const impActions = el("div", { class: "rl-actions" });
+      const fileInput = el("input", {
+        class: "file-input",
+        type: "file",
+        accept: "application/json,.json",
+      });
+      const impBtn = el("button", { class: "btn btn-ghost", type: "button" });
+      impBtn.innerHTML = Ops.icon("upload", 16);
+      impBtn.appendChild(el("span", { text: "Choose file" }));
+      impBtn.addEventListener("click", () => fileInput.click());
+      impActions.appendChild(impBtn);
+      impActions.appendChild(fileInput);
+      impRow.appendChild(impActions);
+      wrap.appendChild(impRow);
+
+      fileInput.addEventListener("change", () => {
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          handleImportText(String(reader.result || ""));
+          fileInput.value = "";
+        };
+        reader.onerror = () => Ops.toast("Could not read that file.", "error");
+        reader.readAsText(f);
+      });
+
+      return wrap;
+    }
+
+    function doExport() {
+      const json = Ops.exportState();
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/[:T]/g, "-");
+      a.href = url;
+      a.download = `ops-room-${stamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      Ops.toast("Exported.", "success");
+    }
+
+    async function handleImportText(text) {
+      let summary;
+      let normalized;
+      try {
+        const res = Ops.summarizeImport(text);
+        summary = res.summary;
+        normalized = res.normalized;
+      } catch (err) {
+        Ops.toast((err && err.message) || "Invalid file.", "error");
+        return;
+      }
+
+      const lines = [
+        `Custom subjects: <span class="k">${summary.customSubjects}</span>`,
+        `Chapters touched: <span class="k">${summary.chaptersTouched}</span>`,
+        `Paper finals recorded: <span class="k">${summary.paperFinalsTouched}</span>`,
+        `Subject finals recorded: <span class="k">${summary.subjectFinalsTouched}</span>`,
+        `Mock test has data: <span class="k">${summary.hasMockTest ? "yes" : "no"}</span>`,
+      ];
+
+      const ok = await showImportConfirm(lines);
+      if (!ok) return;
+
+      Ops.applyImport(normalized);
+      Ops.toast("Imported.", "success");
+      if (window.Ops._refreshSync) window.Ops._refreshSync();
+      render();
+    }
+
+    // Custom modal with the summary list (distinct from the plain confirmDialog).
+    function showImportConfirm(lines) {
+      return new Promise((resolve) => {
+        const overlay = el("div", { class: "modal-overlay" });
+        const box = el("div", { class: "modal", role: "dialog", "aria-modal": "true" });
+
+        box.appendChild(el("h3", { class: "modal-title", text: "Confirm import" }));
+        box.appendChild(
+          el("p", {
+            class: "modal-body",
+            text: "This will replace your current progress with the file's contents.",
+          })
+        );
+
+        const preview = el("div", { class: "import-preview" });
+        preview.appendChild(el("h4", { text: "What's in the file" }));
+        const ul = el("ul");
+        for (const line of lines) {
+          const li = el("li");
+          // lines are static labels + numbers — no user text — safe for innerHTML
+          li.innerHTML = line;
+          ul.appendChild(li);
+        }
+        preview.appendChild(ul);
+        box.appendChild(preview);
+
+        const actions = el("div", {
+          class: "modal-actions",
+          style: "margin-top:16px;",
+        });
+        const cancel = el("button", {
+          class: "btn btn-ghost",
+          type: "button",
+          text: "Cancel",
+        });
+        const confirm = el("button", {
+          class: "btn btn-danger",
+          type: "button",
+          text: "Replace progress",
+        });
+        cancel.addEventListener("click", () => close(false));
+        confirm.addEventListener("click", () => close(true));
+        actions.appendChild(cancel);
+        actions.appendChild(confirm);
+        box.appendChild(actions);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+        void overlay.offsetHeight;
+        overlay.classList.add("in");
+
+        const onKey = (e) => {
+          if (e.key === "Escape") close(false);
+        };
+        document.addEventListener("keydown", onKey);
+
+        function close(val) {
+          document.removeEventListener("keydown", onKey);
+          overlay.classList.remove("in");
+          setTimeout(() => {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+          }, 160);
+          resolve(val);
+        }
+      });
+    }
+
+    // ── custom syllabus ─────────────────────────────────────────────────────
+    function customSection() {
+      const wrap = el("section", { class: "set-section" });
+      wrap.appendChild(
+        sectionHead(
+          "Custom syllabus",
+          "Add subjects, papers, or chapters that behave exactly like the defaults. They're stored in your progress state, so they sync and export with everything else."
+        )
+      );
+
+      wrap.appendChild(subjectBuilder());
+      wrap.appendChild(paperBuilder());
+      wrap.appendChild(chapterBuilder());
+
+      const custom = Ops.getState().custom.subjects || [];
+      if (custom.length > 0) {
+        const listHead = el("div", {
+          class: "label",
+          style: "margin-top: 18px;",
+          text: "Your custom subjects",
+        });
+        wrap.appendChild(listHead);
+
+        const list = el("div", { class: "custom-list" });
+        for (const cs of custom) list.appendChild(customSubjectRow(cs));
+        wrap.appendChild(list);
+      }
+
+      return wrap;
+    }
+
+    function subjectBuilder() {
+      const card = el("div", { class: "builder" });
+      const head = el("div", { class: "builder-head" });
+      head.appendChild(el("h3", { class: "bt", text: "Add custom subject" }));
+      card.appendChild(head);
+
+      const grid = el("div", { class: "builder-grid" });
+      const nameEn = textField("English name", "e.g. English", grid, "full");
+      const nameBn = textField("Bengali name (optional)", "বাংলা নাম", grid);
+      card.appendChild(grid);
+
+      const foot = el("div", { class: "builder-foot" });
+      const btn = el("button", {
+        class: "btn btn-primary",
+        type: "button",
+        text: "Add subject",
+      });
+      btn.addEventListener("click", () => {
+        const en = nameEn.value.trim();
+        const bn = nameBn.value.trim();
+        if (!en) return Ops.toast("Enter an English name.", "error");
+
+        const id = slug("custom-subj", en);
+        if (Ops.findSubject(id)) return Ops.toast("Subject already exists.", "error");
+
+        Ops.mutate((s) => {
+          s.custom.subjects.push({ id, name: en, nameBn: bn || en, papers: [] });
+        });
+
+        Ops.toast(`Added ${en}.`, "success");
+        if (window.Ops._refreshSync) window.Ops._refreshSync();
+        render();
+      });
+      foot.appendChild(btn);
+      card.appendChild(foot);
+      return card;
+    }
+
+    function paperBuilder() {
+      const card = el("div", { class: "builder" });
+      const head = el("div", { class: "builder-head" });
+      head.appendChild(el("h3", { class: "bt", text: "Add custom paper" }));
+      card.appendChild(head);
+
+      const grid = el("div", { class: "builder-grid" });
+
+      const subjWrap = el("div", { class: "field field-full" });
+      subjWrap.appendChild(el("label", { text: "Subject" }));
+      const sel = el("select", { class: "input" });
+      for (const s of Ops.getMergedSyllabus()) {
+        sel.appendChild(el("option", { value: s.id, text: s.name }));
+      }
+      subjWrap.appendChild(sel);
+      grid.appendChild(subjWrap);
+
+      const nameEn = textField("Paper name", "e.g. 3rd Paper", grid, "full");
+      card.appendChild(grid);
+
+      const foot = el("div", { class: "builder-foot" });
+      const btn = el("button", {
+        class: "btn btn-primary",
+        type: "button",
+        text: "Add paper",
+      });
+      btn.addEventListener("click", () => {
+        const subjectId = sel.value;
+        const s = Ops.findSubject(subjectId);
+        if (!s) return Ops.toast("Pick a subject.", "error");
+        const nm = nameEn.value.trim();
+        if (!nm) return Ops.toast("Enter a paper name.", "error");
+
+        if (!s.isCustom) {
+          return Ops.toast(
+            "Add custom papers to a custom subject only. Default subjects keep their built-in papers.",
+            "info"
+          );
+        }
+
+        const id = slug("custom-paper", nm);
+        if (Ops.findPaper(id)) return Ops.toast("Paper already exists.", "error");
+
+        Ops.mutate((st) => {
+          const target = st.custom.subjects.find((x) => x.id === subjectId);
+          if (!target) return;
+          if (!Array.isArray(target.papers)) target.papers = [];
+          target.papers.push({ id, name: nm, nameBn: nm, chapters: [] });
+        });
+
+        Ops.toast(`Added ${nm} to ${s.name}.`, "success");
+        if (window.Ops._refreshSync) window.Ops._refreshSync();
+        render();
+      });
+      foot.appendChild(btn);
+      card.appendChild(foot);
+      return card;
+    }
+
+    function chapterBuilder() {
+      const card = el("div", { class: "builder" });
+      const head = el("div", { class: "builder-head" });
+      head.appendChild(el("h3", { class: "bt", text: "Add custom chapter" }));
+      card.appendChild(head);
+
+      const grid = el("div", { class: "builder-grid" });
+
+      const subjWrap = el("div", { class: "field" });
+      subjWrap.appendChild(el("label", { text: "Subject" }));
+      const selSubj = el("select", { class: "input" });
+      for (const s of Ops.getMergedSyllabus()) {
+        selSubj.appendChild(el("option", { value: s.id, text: s.name }));
+      }
+      subjWrap.appendChild(selSubj);
+      grid.appendChild(subjWrap);
+
+      const paperWrap = el("div", { class: "field" });
+      paperWrap.appendChild(el("label", { text: "Paper" }));
+      const selPaper = el("select", { class: "input" });
+      paperWrap.appendChild(selPaper);
+      grid.appendChild(paperWrap);
+
+      const nameBn = textField("Chapter name", "অধ্যায়ের নাম", grid, "full");
+      card.appendChild(grid);
+
+      function refreshPapers() {
+        selPaper.innerHTML = "";
+        const s = Ops.findSubject(selSubj.value);
+        const papers = s ? s.papers : [];
+        for (const p of papers) {
+          selPaper.appendChild(el("option", { value: p.id, text: p.name }));
+        }
+      }
+      selSubj.addEventListener("change", refreshPapers);
+      refreshPapers();
+
+      const foot = el("div", { class: "builder-foot" });
+      const btn = el("button", {
+        class: "btn btn-primary",
+        type: "button",
+        text: "Add chapter",
+      });
+      btn.addEventListener("click", () => {
+        const paperId = selPaper.value;
+        const p = Ops.findPaper(paperId);
+        if (!p) return Ops.toast("Pick a paper.", "error");
+        const nm = nameBn.value.trim();
+        if (!nm) return Ops.toast("Enter a chapter name.", "error");
+
+        if (!p.isCustom) {
+          return Ops.toast(
+            "Add custom chapters to a custom paper only. Default papers keep their built-in chapters.",
+            "info"
+          );
+        }
+
+        const id = slug("custom-chap", nm);
+        if (Ops.findChapter(id)) return Ops.toast("Chapter already exists.", "error");
+
+        Ops.mutate((st) => {
+          for (const cs of st.custom.subjects) {
+            const target = (cs.papers || []).find((x) => x.id === paperId);
+            if (!target) continue;
+            if (!Array.isArray(target.chapters)) target.chapters = [];
+            target.chapters.push({ id, name: nm });
+            return;
+          }
+        });
+
+        Ops.toast(`Added ${nm}.`, "success");
+        if (window.Ops._refreshSync) window.Ops._refreshSync();
+        render();
+      });
+      foot.appendChild(btn);
+      card.appendChild(foot);
+      return card;
+    }
+
+    function customSubjectRow(cs) {
+      const row = el("div", { class: "custom-row" });
+
+      const body = el("div", { class: "cr-body" });
+      body.appendChild(el("div", { class: "cr-title", text: cs.name }));
+
+      const paperCount = (cs.papers || []).length;
+      const chapCount = (cs.papers || []).reduce(
+        (n, p) => n + (p.chapters ? p.chapters.length : 0),
+        0
+      );
+      body.appendChild(
+        el("div", {
+          class: "cr-sub",
+          text: `${paperCount} paper${paperCount === 1 ? "" : "s"} · ${chapCount} chapter${
+            chapCount === 1 ? "" : "s"
+          }`,
+        })
+      );
       row.appendChild(body);
 
-      const ctrlWrap = el("div", { class: "mc-ctrl" });
-      const ctrl = Ops.counter(
-        initial,
-        (val) => {
-          Ops.setMockTestField(field, val);
-          row.classList.toggle("done", val >= 1);
-          afterChange();
-        },
-        { compact: false }
-      );
-      ctrlWrap.appendChild(ctrl.node);
-      row.appendChild(ctrlWrap);
+      const del = el("button", {
+        class: "cr-del",
+        type: "button",
+        "aria-label": `Remove ${cs.name}`,
+      });
+      del.innerHTML = Ops.icon("trash", 18);
+      del.addEventListener("click", async () => {
+        const ok = await Ops.confirmDialog({
+          title: `Remove ${cs.name}?`,
+          body:
+            "This also removes all chapters inside it and any progress recorded against them. This cannot be undone.",
+          confirmText: "Remove",
+          danger: true,
+        });
+        if (!ok) return;
 
+        Ops.mutate((s) => {
+          s.custom.subjects = s.custom.subjects.filter((x) => x.id !== cs.id);
+
+          const removedPaperIds = new Set((cs.papers || []).map((p) => p.id));
+          const removedChapIds = new Set();
+          for (const p of cs.papers || []) {
+            for (const c of p.chapters || []) removedChapIds.add(c.id);
+          }
+
+          for (const cid of Object.keys(s.progress.chapters)) {
+            if (removedChapIds.has(cid)) delete s.progress.chapters[cid];
+          }
+          for (const pid of Object.keys(s.progress.paperFinals)) {
+            if (removedPaperIds.has(pid)) delete s.progress.paperFinals[pid];
+          }
+          if (s.progress.subjectFinals) delete s.progress.subjectFinals[cs.id];
+        });
+
+        Ops.toast(`${cs.name} removed.`, "success");
+        if (window.Ops._refreshSync) window.Ops._refreshSync();
+        render();
+      });
+      row.appendChild(del);
       return row;
     }
 
-    function afterChange() {
-      const done = Ops.isMockTestComplete();
-      paintStatus();
-
-      if (done && !wasComplete) {
-        Ops.toast("Full mock test complete.", "success");
-      } else if (!done && wasComplete) {
-        Ops.toast("Full mock test un-completed.", "info");
-      }
-      wasComplete = done;
-
-      if (window.Ops._refreshSync) window.Ops._refreshSync();
+    function textField(labelText, placeholder, grid, extraClass) {
+      const wrap = el("div", {
+        class: "field" + (extraClass ? " field-" + extraClass : ""),
+      });
+      const id = "f_" + Math.random().toString(36).slice(2, 8);
+      wrap.appendChild(el("label", { for: id, text: labelText }));
+      const input = el("input", {
+        id,
+        class: "input",
+        type: "text",
+        placeholder,
+        autocomplete: "off",
+        spellcheck: "false",
+      });
+      wrap.appendChild(input);
+      grid.appendChild(wrap);
+      return input;
     }
 
-    // ── info note ───────────────────────────────────────────────────────────
-    function noteBlock() {
-      const note = el("div", { class: "mock-note" });
+    function slug(prefix, text) {
+      const base = text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\p{L}\p{N}]+/gu, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 40);
+      const rand = Math.random().toString(36).slice(2, 6);
+      return `${prefix}-${base || "x"}-${rand}`;
+    }
 
-      const ic = el("div", { class: "note-icon" });
-      ic.innerHTML = Ops.icon("warning", 18);
-      note.appendChild(ic);
+    // ── account ─────────────────────────────────────────────────────────────
+    function accountSection() {
+      const wrap = el("section", { class: "set-section" });
+      wrap.appendChild(sectionHead("Account", ""));
 
-      const body = el("div", { class: "note-body" });
-      body.innerHTML =
-        "<strong>No coins here.</strong> " +
-        "The Full Mock Test is a single global instance app-wide — it doesn't generate coins, " +
-        "only the completion status above. Counters are unlimited; 1× satisfies the requirement, " +
-        "so add more passes only if you actually sit more full mock exams.";
-      note.appendChild(body);
+      const row = el("div", { class: "row-line" });
+      const body = el("div", { class: "rl-body" });
+      body.appendChild(el("div", { class: "rl-title", text: "Signed in as" }));
+      body.appendChild(
+        el("div", { class: "rl-sub", text: Ops.getUsername() || "(unknown)" })
+      );
+      row.appendChild(body);
 
-      return note;
+      const actions = el("div", { class: "rl-actions" });
+      const out = el("button", { class: "btn btn-ghost", type: "button" });
+      out.innerHTML = Ops.icon("logout", 16);
+      out.appendChild(el("span", { text: "Sign out" }));
+      out.addEventListener("click", async () => {
+        const ok = await Ops.confirmDialog({
+          title: "Sign out?",
+          body: "Your local progress stays on this device.",
+          confirmText: "Sign out",
+        });
+        if (ok) await Ops.logout();
+      });
+      actions.appendChild(out);
+      row.appendChild(actions);
+      wrap.appendChild(row);
+
+      return wrap;
+    }
+
+    // ── danger zone ─────────────────────────────────────────────────────────
+    function dangerSection() {
+      const wrap = el("section", { class: "set-section" });
+      wrap.appendChild(
+        sectionHead(
+          "Danger zone",
+          "Wipes local progress and returns the app to a fresh state. Cloud data (if any) is not touched — you can still restore it afterward."
+        )
+      );
+
+      const row = el("div", { class: "row-line danger-zone" });
+      const body = el("div", { class: "rl-body" });
+      body.appendChild(el("div", { class: "rl-title", text: "Reset all local progress" }));
+      body.appendChild(
+        el("div", {
+          class: "rl-sub",
+          text: "Counters, toggles, and custom syllabus — everything local is cleared.",
+        })
+      );
+      row.appendChild(body);
+
+      const actions = el("div", { class: "rl-actions" });
+      const btn = el("button", { class: "btn btn-danger", type: "button" });
+      btn.innerHTML = Ops.icon("trash", 16);
+      btn.appendChild(el("span", { text: "Reset" }));
+      btn.addEventListener("click", () => doReset(btn));
+      actions.appendChild(btn);
+      row.appendChild(actions);
+      wrap.appendChild(row);
+
+      return wrap;
+    }
+
+    async function doReset(btn) {
+      const first = await Ops.confirmDialog({
+        title: "Reset local progress?",
+        body:
+          "Every counter, toggle, and custom subject will be erased on this device. This cannot be undone (unless you exported a backup or have a cloud copy).",
+        confirmText: "Continue",
+        danger: true,
+      });
+      if (!first) return;
+
+      const second = await Ops.confirmDialog({
+        title: "Are you absolutely sure?",
+        body: "This is the last step. The data will be gone.",
+        confirmText: "Reset everything",
+        danger: true,
+      });
+      if (!second) return;
+
+      btn.disabled = true;
+      Ops.clearAll();
+      Ops.toast("Local state cleared.", "info");
+      setTimeout(() => {
+        location.replace("index.html");
+      }, 350);
     }
   })();
   </script>
