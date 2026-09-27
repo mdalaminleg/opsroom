@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+  <title>Dashboard · Ops Room</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    /* ── dashboard-scoped ──────────────────────────────────────────────────── */
+    .continue-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .continue-row .btn {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .continue-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+
+    /* collapsible section header (mobile only shows the chevron) */
+    .collapse-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 6px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .collapse-head h2,
+    .collapse-head h3 {
+      margin: 0;
+    }
+    .collapse-head .chev {
+      color: var(--gray);
+      transition: transform var(--transition);
+      flex: 0 0 auto;
+    }
+    .collapse-head.open .chev {
+      transform: rotate(180deg);
+    }
+    .collapse-body {
+      margin-top: 12px;
+    }
+    .collapse-body.hidden {
+      display: none;
+    }
+
+    /* paper / subject final overview rows */
+    .final-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .final-row:hover,
+    .final-row:focus-visible {
+      border-color: var(--border2);
+      background: var(--surface2);
+      outline: none;
+    }
+    .final-row + .final-row {
+      margin-top: 8px;
+    }
+    .final-row .fr-body {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .final-row .fr-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .final-row .fr-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      margin-top: 2px;
+    }
+    .final-row .fr-status {
+      flex: 0 0 auto;
+    }
+
+    /* mock test block */
+    .mock-block {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .mock-cell {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface2);
+      padding: 12px 12px 10px;
+      text-align: center;
+    }
+    .mock-cell .m-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray);
+      margin-bottom: 6px;
+    }
+    .mock-cell .m-value {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 20px;
+      color: var(--white);
+    }
+    .mock-cell.done {
+      border-color: rgba(16, 212, 142, 0.4);
+      background: var(--green-dim);
+    }
+    .mock-cell.done .m-value {
+      color: var(--green);
+    }
+
+    /* loading state */
+    .dash-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 40vh;
+      color: var(--gray);
+    }
+
+    @media (max-width: 480px) {
+      .mock-block { gap: 8px; }
+      .mock-cell { padding: 10px 8px; }
+    }
+  </style>
+</head>
+<body data-page="dashboard" class="booting">
+
+  <main class="app-content" id="app-view">
+    <div class="dash-loading">
+      <div class="spinner" aria-hidden="true"></div>
+      <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        Loading progress…
+      </div>
+    </div>
+  </main>
+
+  <script src="/syllabus.js"></script>
+  <script src="/core.js"></script>
+  <script src="/shared.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    const view = document.getElementById("app-view");
+
+    if (!Ops.boot()) return;
+
+    render();
+
+    // ── render ──────────────────────────────────────────────────────────────
+    function render() {
+      view.innerHTML = "";
+      view.appendChild(pageHead());
+      view.appendChild(continueRow());
+      view.appendChild(heroCard());
+      view.appendChild(subjectsSection());
+      view.appendChild(paperFinalsSection());
+      view.appendChild(subjectFinalsSection());
+      view.appendChild(mockTestSection());
+
+      // Collapsible behaviour (mobile-friendly, works on desktop too)
+      wireCollapsibles();
+    }
+
+    // ── page head ───────────────────────────────────────────────────────────
+    function pageHead() {
+      const wrap = el("div", { class: "page-head" });
+      wrap.appendChild(
+        el("div", {
+          class: "crumb",
+          text: `Signed in as ${Ops.getUsername() || "you"}`,
+        })
+      );
+      wrap.appendChild(el("h1", { text: "Dashboard" }));
+      const sub = el("p", { class: "muted", style: "margin: 0; font-size: 14px;" });
+      sub.textContent = "Your syllabus at a glance. Everything is saved locally first — sync when you like.";
+      wrap.appendChild(sub);
+      return wrap;
+    }
+
+    // ── continue ────────────────────────────────────────────────────────────
+    function continueRow() {
+      const wrap = el("div", { class: "continue-row" });
+      const { done, total } = Ops.getChapterTotals();
+      const complete = done === total && total > 0;
+
+      const meta = el("div", { class: "continue-meta", style: "width: 100%;" });
+      const last = Ops.getLastOpened();
+      if (last) {
+        meta.textContent = `Last opened · ${describeItem(last)}`;
+      } else {
+        meta.textContent = "Pick up where you left off";
+      }
+      wrap.appendChild(meta);
+
+      const btn = el("button", {
+        class: "btn btn-primary",
+        type: "button",
+      });
+      btn.innerHTML = Ops.icon("chapter", 18);
+      btn.appendChild(el("span", { text: complete ? "Back to dashboard" : "Continue studying" }));
+      btn.addEventListener("click", () => {
+        const target = Ops.getContinueTarget();
+        if (target) location.href = target;
+      });
+      wrap.appendChild(btn);
+
+      return wrap;
+    }
+
+    function describeItem(item) {
+      if (!item) return "";
+      switch (item.type) {
+        case "chapter": {
+          const c = Ops.findChapter(item.id);
+          return c ? c.name : "chapter";
+        }
+        case "subject": {
+          const s = Ops.findSubject(item.id);
+          return s ? s.name : "subject";
+        }
+        case "paperFinal": {
+          const p = Ops.findPaper(item.id);
+          return p ? `${p.name} Final` : "paper final";
+        }
+        case "subjectFinal": {
+          const s = Ops.findSubject(item.id);
+          return s ? `${s.name} Final` : "subject final";
+        }
+        case "mockTest":
+          return "Full Mock Test";
+        default:
+          return "";
+      }
+    }
+
+    // ── hero (dominant % + coins + done/remaining) ─────────────────────────
+    function heroCard() {
+      const { done, total } = Ops.getChapterTotals();
+      const pct = Ops.getOverallPercentage();
+      const coins = Ops.getCoins();
+      const remaining = total - done;
+
+      const wrap = el("section", { class: "hero" });
+
+      const top = el("div", { class: "hero-top" });
+
+      const pctWrap = el("div", { class: "hero-pct tnum" });
+      pctWrap.appendChild(document.createTextNode(String(pct)));
+      pctWrap.appendChild(el("span", { class: "pct", text: "%" }));
+
+      const meta = el("div", { class: "hero-meta" });
+      meta.appendChild(statBlock("Coins", `${coins} / ${total}`, "coin-val"));
+      meta.appendChild(statBlock("Done", String(done)));
+      meta.appendChild(statBlock("Remaining", String(remaining)));
+
+      top.appendChild(pctWrap);
+      top.appendChild(meta);
+      wrap.appendChild(top);
+
+      wrap.appendChild(Ops.progressBar(pct));
+
+      const note = el("div", {
+        class: "muted",
+        style: "margin-top: 12px; font-size: 12.5px;",
+      });
+      note.textContent =
+        pct === 100
+          ? "Every chapter is complete. Time for full mock tests."
+          : `${remaining} chapter${remaining === 1 ? "" : "s"} left across ${Ops.getMergedSyllabus().length} subjects.`;
+      wrap.appendChild(note);
+
+      return wrap;
+    }
+
+    function statBlock(label, value, extraClass) {
+      const b = el("div", { class: "stat" });
+      b.appendChild(el("span", { class: "stat-label", text: label }));
+      const v = el("span", { class: "stat-value" + (extraClass ? " " + extraClass : "") });
+      // value may contain "42 / 82" — split the "/" into a lighter span
+      if (typeof value === "string" && value.indexOf(" / ") !== -1) {
+        const [a, b2] = value.split(" / ");
+        v.appendChild(document.createTextNode(a));
+        v.appendChild(el("span", { class: "div", text: " / " }));
+        v.appendChild(document.createTextNode(b2));
+      } else {
+        v.textContent = value;
+      }
+      b.appendChild(v);
+      return b;
+    }
+
+    // ── subjects ────────────────────────────────────────────────────────────
+    function subjectsSection() {
+      const section = el("section", { class: "section", id: "subjects" });
+      section.appendChild(collapseHead("Subjects", "subjects"));
+
+      const body = el("div", { class: "collapse-body grid grid-2" });
+
+      for (const s of Ops.getMergedSyllabus()) {
+        body.appendChild(subjectCard(s));
+      }
+
+      section.appendChild(body);
+      return section;
+    }
+
+    function subjectCard(s) {
+      const stats = Ops.getSubjectStats(s.id);
+
+      // Paper final statuses for this subject.
+      const pfStatuses = s.papers.map((p) => ({
+        name: p.name,
+        done: Ops.isPaperFinalComplete(p.id),
+      }));
+      const sfDone = Ops.isSubjectFinalComplete(s.id);
+
+      const card = el("a", {
+        class: "subject-card",
+        href: `subject.html?id=${encodeURIComponent(s.id)}`,
+      });
+
+      const top = el("div", { class: "row-top" });
+      const nameWrap = el("div", { style: "min-width:0;" });
+      const name = el("div", { class: "subj-name", text: s.name });
+      nameWrap.appendChild(name);
+      if (s.nameBn && s.nameBn !== s.name) {
+        nameWrap.appendChild(el("div", { class: "subj-name-bn bn", text: s.nameBn }));
+      }
+      top.appendChild(nameWrap);
+      const pctEl = el("div", { class: "pct tnum", text: `${stats.pct}%` });
+      top.appendChild(pctEl);
+      card.appendChild(top);
+
+      card.appendChild(Ops.progressBar(stats.pct, { small: true }));
+
+      const countLine = el("div", {
+        class: "muted",
+        style: "margin-top: 10px; font-size: 12.5px;",
+      });
+      countLine.textContent = `${stats.done} of ${stats.total} chapters complete`;
+      card.appendChild(countLine);
+
+      // Pills: per-paper final statuses + subject final.
+      const metaRow = el("div", { class: "meta-row" });
+      for (const pf of pfStatuses) {
+        metaRow.appendChild(
+          el("span", {
+            class: "pill" + (pf.done ? " ok" : ""),
+            html: `<span class="dot"></span>${Ops.esc(pf.name)} Final`,
+          })
+        );
+      }
+      metaRow.appendChild(
+        el("span", {
+          class: "pill" + (sfDone ? " ok" : ""),
+          html: `<span class="dot"></span>Subject Final`,
+        })
+      );
+      if (s.isCustom) {
+        metaRow.appendChild(el("span", { class: "pill custom", text: "Custom" }));
+      }
+      card.appendChild(metaRow);
+
+      return card;
+    }
+
+    // ── paper finals ────────────────────────────────────────────────────────
+    function paperFinalsSection() {
+      const section = el("section", { class: "section" });
+      section.appendChild(collapseHead("Paper Finals", "paper-finals"));
+
+      const body = el("div", { class: "collapse-body" });
+
+      for (const s of Ops.getMergedSyllabus()) {
+        for (const p of s.papers) {
+          body.appendChild(
+            finalRow({
+              title: `${s.name} · ${p.name}`,
+              sub: `Paper Final`,
+              done: Ops.isPaperFinalComplete(p.id),
+              href: `finals.html?paper=${encodeURIComponent(p.id)}`,
+            })
+          );
+        }
+      }
+
+      section.appendChild(body);
+      return section;
+    }
+
+    // ── subject finals ──────────────────────────────────────────────────────
+    function subjectFinalsSection() {
+      const section = el("section", { class: "section" });
+      section.appendChild(collapseHead("Subject Finals", "subject-finals"));
+
+      const body = el("div", { class: "collapse-body" });
+
+      for (const s of Ops.getMergedSyllabus()) {
+        body.appendChild(
+          finalRow({
+            title: s.name,
+            sub: "Subject Final",
+            done: Ops.isSubjectFinalComplete(s.id),
+            href: `finals.html?subject=${encodeURIComponent(s.id)}`,
+          })
+        );
+      }
+
+      section.appendChild(body);
+      return section;
+    }
+
+    function finalRow(opts) {
+      const row = el("a", { class: "final-row", href: opts.href });
+
+      const body = el("div", { class: "fr-body" });
+      body.appendChild(el("div", { class: "fr-title", text: opts.title }));
+      body.appendChild(el("div", { class: "fr-sub", text: opts.sub }));
+      row.appendChild(body);
+
+      const status = el("div", { class: "fr-status" });
+      status.innerHTML = opts.done
+        ? `<span class="cr-check done">${Ops.icon("check", 14)}</span>`
+        : `<span class="cr-check">${Ops.icon("final", 14)}</span>`;
+      row.appendChild(status);
+
+      return row;
+    }
+
+    // ── full mock test ──────────────────────────────────────────────────────
+    function mockTestSection() {
+      const section = el("section", { class: "section" });
+      section.appendChild(collapseHead("Full Mock Test", "mock-test"));
+
+      const body = el("div", { class: "collapse-body" });
+      const m = Ops.getMockTest();
+      const done = Ops.isMockTestComplete();
+
+      const intro = el("div", {
+        class: "muted",
+        style: "font-size: 13px; margin-bottom: 6px;",
+      });
+      intro.textContent = done
+        ? "You have completed a full mock test pass."
+        : "One global instance. Complete all three to finish.";
+      body.appendChild(intro);
+
+      const block = el("div", { class: "mock-block" });
+      block.appendChild(mockCell("Recall", m.recall));
+      block.appendChild(mockCell("QB", m.qb));
+      block.appendChild(mockCell("Exam", m.exam));
+      body.appendChild(block);
+
+      const actions = el("div", { style: "margin-top: 14px;" });
+      const a = el("a", { class: "btn btn-ghost", href: "mock-test.html" });
+      a.innerHTML = Ops.icon("mock", 18);
+      a.appendChild(el("span", { text: done ? "Review mock test" : "Open mock test" }));
+      actions.appendChild(a);
+      body.appendChild(actions);
+
+      section.appendChild(body);
+      return section;
+    }
+
+    function mockCell(label, value) {
+      const cell = el("div", { class: "mock-cell" + (value >= 1 ? " done" : "") });
+      cell.appendChild(el("div", { class: "m-label", text: label }));
+      cell.appendChild(el("div", { class: "m-value tnum", text: String(value) }));
+      return cell;
+    }
+
+    // ── collapsible heads ───────────────────────────────────────────────────
+    function collapseHead(titleText, key) {
+      const head = el("button", { class: "collapse-head open", type: "button" });
+      head.dataset.collapseKey = key;
+      head.setAttribute("aria-expanded", "true");
+
+      head.appendChild(el("h2", { text: titleText }));
+      const chev = el("span", { class: "chev" });
+      chev.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+      head.appendChild(chev);
+
+      return head;
+    }
+
+    function wireCollapsibles() {
+      Ops.$$(".collapse-head").forEach((head) => {
+        const key = head.dataset.collapseKey;
+        const body = head.parentElement.querySelector(".collapse-body");
+        if (!body) return;
+
+        // Restore previous state for this section.
+        const stored = localStorage.getItem("ops_collapse_" + key);
+        if (stored === "closed") {
+          head.classList.remove("open");
+          head.setAttribute("aria-expanded", "false");
+          body.classList.add("hidden");
+        }
+
+        head.addEventListener("click", () => {
+          const isOpen = head.classList.toggle("open");
+          head.setAttribute("aria-expanded", isOpen ? "true" : "false");
+          body.classList.toggle("hidden", !isOpen);
+          localStorage.setItem("ops_collapse_" + key, isOpen ? "open" : "closed");
+        });
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
