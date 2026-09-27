@@ -153,10 +153,42 @@
   <script src="/shared.js"></script>
 
   <script>
+  // ── crash net: catches literally anything that goes wrong on this page and
+  // prints it into the card, so a plain phone with no devtools can still see
+  // the real error. This listener is registered before anything else runs.
+  (function () {
+    "use strict";
+    function showCrash(label, err) {
+      var slot = document.getElementById("auth-slot");
+      document.body.style.visibility = "visible";
+      if (!slot) return;
+      var msg = (err && (err.message || String(err))) || "Unknown error";
+      slot.innerHTML =
+        '<div style="text-align:left;">' +
+        '<div style="font-weight:600;color:#f0566a;margin-bottom:8px;">' + label + '</div>' +
+        '<div style="font-family:monospace;font-size:12px;color:#a0adb8;word-break:break-word;white-space:pre-wrap;">' +
+        String(msg).replace(/</g, "&lt;") +
+        '</div>' +
+        '<button type="button" onclick="location.reload()" ' +
+        'style="margin-top:16px;width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:#111827;color:#f0f4f8;font-size:14px;">Reload page</button>' +
+        '</div>';
+    }
+    window.addEventListener("error", function (e) {
+      showCrash("A script failed to run", e.error || e.message);
+    });
+    window.addEventListener("unhandledrejection", function (e) {
+      showCrash("A background request failed", e.reason);
+    });
+    window.__opsShowCrash = showCrash;
+  })();
+  </script>
+
+  <script>
   (function () {
     "use strict";
 
     const slot = document.getElementById("auth-slot");
+    let settled = false;
 
     // Reveal the page no matter which code path below runs (or fails).
     // This MUST be wired up before any early return, or the body can be
@@ -170,27 +202,51 @@
       document.addEventListener("DOMContentLoaded", reveal);
     }
 
-    // If already logged in, skip straight into the app.
-    // We don't block on server verification — a present token gets us in;
-    // core.js's requireAuth() will redirect out if the token turns out bad.
-    if (Ops.getToken()) {
-      // Fire-and-forget check; if it 401s, core.js's api() throws and we log out.
-      Ops.api("/auth/me")
-        .then(() => location.replace("dashboard.html"))
-        .catch((err) => {
-          if (err && err.status === 401) {
-            Ops.setToken(null);
-            Ops.setUsername(null);
-            render(); // fall through to normal auth flow
-          } else {
-            // Network error: token may still be valid. Let them in optimistically.
-            location.replace("dashboard.html");
-          }
-        });
-      return;
-    }
+    // Watchdog: if nothing has replaced the initial "Checking account…" state
+    // within 8 seconds (a hung request, a silent failure), show a clear
+    // timeout message instead of leaving the card blank forever.
+    setTimeout(() => {
+      if (!settled) {
+        renderError(
+          "This is taking too long. The backend may not be responding (check that your D1 database is created, bound in wrangler.toml, and that the site is actually deployed to Cloudflare Pages — not opened as a local file)."
+        );
+      }
+    }, 8000);
 
-    render();
+    // Everything below can throw for all sorts of reasons (missing scripts,
+    // a bad deploy, a network hiccup) — catch it and show it, don't go blank.
+    try {
+      // If already logged in, skip straight into the app.
+      if (typeof Ops === "undefined") {
+        throw new Error(
+          "core.js / shared.js did not load. If you're viewing this file locally (file://) instead of through a real server or Cloudflare Pages deploy, the /core.js and /shared.js paths won't resolve — that's the fix."
+        );
+      }
+
+      if (Ops.getToken()) {
+        // Fire-and-forget check; if it 401s, core.js's api() throws and we log out.
+        Ops.api("/auth/me")
+          .then(() => {
+            settled = true;
+            location.replace("dashboard.html");
+          })
+          .catch((err) => {
+            if (err && err.status === 401) {
+              Ops.setToken(null);
+              Ops.setUsername(null);
+              render(); // fall through to normal auth flow
+            } else {
+              // Network error: token may still be valid. Let them in optimistically.
+              settled = true;
+              location.replace("dashboard.html");
+            }
+          });
+      } else {
+        render();
+      }
+    } catch (err) {
+      window.__opsShowCrash("Page failed to start", err);
+    }
 
     function render() {
       slot.innerHTML = "";
@@ -201,10 +257,17 @@
 
       Ops.api("/auth/status", { auth: false })
         .then((res) => {
+          settled = true;
           if (res && res.exists) renderLogin();
           else renderSetup();
         })
-        .catch(() => renderError("Could not reach the server. Check your connection and try again."));
+        .catch((err) => {
+          settled = true;
+          renderError(
+            ((err && err.message) || "Could not reach the server.") +
+              " (status: " + (err && err.status !== undefined ? err.status : "network") + ")"
+          );
+        });
     }
 
     // ── setup (first-ever run) ──────────────────────────────────────────────
@@ -328,11 +391,14 @@
     // ── error ───────────────────────────────────────────────────────────────
     function renderError(msg) {
       slot.innerHTML = "";
-      const state = el("div", { class: "auth-state" });
-      state.appendChild(el("div", { class: "state-title", text: "Connection problem" }));
-      state.appendChild(el("div", { class: "state-body", text: msg }));
-      const retry = el("button", { class: "btn btn-ghost", type: "button", text: "Retry" });
-      retry.addEventListener("click", render);
+      const state = el("div", { class: "auth-state", style: "text-align:left; align-items:stretch;" });
+      state.appendChild(el("div", { class: "state-title", text: "Connection problem", style: "font-weight:600; margin-bottom:8px; text-align:center;" }));
+      state.appendChild(el("div", { class: "state-body", text: msg, style: "font-size:13px; color: var(--gray2); text-align:center; margin-bottom:16px;" }));
+      const retry = el("button", { class: "btn btn-primary", type: "button", text: "Retry" });
+      retry.addEventListener("click", () => {
+        settled = false;
+        render();
+      });
       state.appendChild(retry);
       slot.appendChild(state);
     }
