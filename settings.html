@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+  <title>Full Mock Test · Ops Room</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    /* ── mock-scoped ───────────────────────────────────────────────────────── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray2);
+      margin-bottom: 12px;
+      transition: color var(--transition);
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .mock-head {
+      margin-bottom: 22px;
+    }
+    .mock-head .crumb {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--gray);
+      margin-bottom: 8px;
+    }
+    .mock-head h1 {
+      font-size: clamp(22px, 5.5vw, 32px);
+      line-height: 1.2;
+      margin: 0 0 6px;
+      font-weight: 600;
+    }
+    .mock-head .sub {
+      font-size: 13px;
+      color: var(--gray2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* status block — matches chapter/finals language */
+    .mock-status {
+      margin: 0 0 22px;
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .mock-status.complete {
+      border-color: rgba(16, 212, 142, 0.45);
+      background: linear-gradient(180deg, var(--green-dim), var(--surface));
+    }
+    .mock-status .ms-ring {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      flex: 0 0 auto;
+      transition: color var(--transition), border-color var(--transition),
+        background var(--transition);
+    }
+    .mock-status.complete .ms-ring {
+      background: var(--green-dim);
+      border-color: rgba(16, 212, 142, 0.55);
+      color: var(--green);
+    }
+    .mock-status .ms-body { flex: 1 1 auto; min-width: 0; }
+    .mock-status .ms-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 2px;
+      color: var(--white);
+    }
+    .mock-status .ms-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray);
+    }
+
+    /* counters */
+    .mock-counter {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .mock-counter + .mock-counter { margin-top: 10px; }
+    .mock-counter.done {
+      border-color: rgba(16, 212, 142, 0.35);
+      background: linear-gradient(180deg, rgba(16, 212, 142, 0.03), var(--surface));
+    }
+    .mock-counter .mc-body { flex: 1 1 auto; min-width: 0; }
+    .mock-counter .mc-title {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 2px;
+    }
+    .mock-counter .mc-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      letter-spacing: 0.02em;
+    }
+    .mock-counter .mc-ctrl { flex: 0 0 auto; }
+
+    /* info note */
+    .mock-note {
+      margin-top: 22px;
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .mock-note .note-icon {
+      color: var(--gray2);
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+    .mock-note .note-body {
+      font-size: 13px;
+      color: var(--gray2);
+      line-height: 1.55;
+    }
+    .mock-note .note-body strong {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    @media (max-width: 520px) {
+      .mock-counter {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body data-page="mock-test" class="booting">
+
+  <main class="app-content" id="app-view">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;color:var(--gray);">
+      <div class="spinner" aria-hidden="true"></div>
+      <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        Loading mock test…
+      </div>
+    </div>
+  </main>
+
+  <script src="/syllabus.js"></script>
+  <script src="/core.js"></script>
+  <script src="/shared.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    const view = document.getElementById("app-view");
+
+    if (!Ops.boot()) return;
+
+    Ops.rememberOpened(null, "mockTest");
+
+    // Live refs
+    let statusHost = null;
+    let wasComplete = Ops.isMockTestComplete();
+
+    render();
+
+    // ── render ──────────────────────────────────────────────────────────────
+    function render() {
+      view.innerHTML = "";
+
+      view.appendChild(backLink());
+      view.appendChild(headBlock());
+
+      statusHost = document.createElement("div");
+      view.appendChild(statusHost);
+      paintStatus();
+
+      view.appendChild(countersBlock());
+      view.appendChild(noteBlock());
+    }
+
+    function backLink() {
+      const a = el("a", { class: "back-link", href: "dashboard.html" });
+      a.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>`;
+      a.appendChild(el("span", { text: "Back to dashboard" }));
+      return a;
+    }
+
+    function headBlock() {
+      const wrap = el("div", { class: "mock-head" });
+
+      wrap.appendChild(el("div", { class: "crumb", text: "Full Mock Test" }));
+      wrap.appendChild(el("h1", { text: "Full Mock Test" }));
+
+      const sub = el("div", { class: "sub" });
+      sub.appendChild(
+        el("span", {
+          text: "One global instance. Track how many full-length mock passes you've completed.",
+        })
+      );
+      wrap.appendChild(sub);
+
+      return wrap;
+    }
+
+    // ── status ──────────────────────────────────────────────────────────────
+    function paintStatus() {
+      statusHost.innerHTML = "";
+
+      const m = Ops.getMockTest();
+      const done = Ops.isMockTestComplete();
+
+      const satisfied =
+        (m.recall >= 1 ? 1 : 0) +
+        (m.qb >= 1 ? 1 : 0) +
+        (m.exam >= 1 ? 1 : 0);
+
+      const wrap = el("section", { class: "mock-status" + (done ? " complete" : "") });
+
+      const ring = el("div", { class: "ms-ring" });
+      ring.innerHTML = done ? Ops.icon("check", 22) : Ops.icon("mock", 22);
+      wrap.appendChild(ring);
+
+      const body = el("div", { class: "ms-body" });
+      body.appendChild(
+        el("div", {
+          class: "ms-title",
+          text: done ? "Mock test complete" : "Not yet complete",
+        })
+      );
+      body.appendChild(
+        el("div", {
+          class: "ms-sub",
+          text: done
+            ? "All three counters satisfied"
+            : `${satisfied} of 3 counters satisfied`,
+        })
+      );
+      wrap.appendChild(body);
+
+      statusHost.appendChild(wrap);
+    }
+
+    // ── counters ────────────────────────────────────────────────────────────
+    function countersBlock() {
+      const wrap = el("div");
+      const m = Ops.getMockTest();
+
+      wrap.appendChild(
+        counterRow(
+          "recall",
+          "Theory + Concept + Active Recall",
+          "Count each full-syllabus recall pass.",
+          m.recall
+        )
+      );
+      wrap.appendChild(
+        counterRow(
+          "qb",
+          "All Chapter QB Solve",
+          "Count each full pass through every chapter's question bank.",
+          m.qb
+        )
+      );
+      wrap.appendChild(
+        counterRow(
+          "exam",
+          "Exam + Error Analysis",
+          "Count each full mock exam sitting plus its error analysis.",
+          m.exam
+        )
+      );
+
+      return wrap;
+    }
+
+    function counterRow(field, title, helper, initial) {
+      const row = el("div", { class: "mock-counter" + (initial >= 1 ? " done" : "") });
+
+      const body = el("div", { class: "mc-body" });
+      body.appendChild(el("div", { class: "mc-title", text: title }));
+      body.appendChild(el("div", { class: "mc-sub", text: helper }));
+      row.appendChild(body);
+
+      const ctrlWrap = el("div", { class: "mc-ctrl" });
+      const ctrl = Ops.counter(
+        initial,
+        (val) => {
+          Ops.setMockTestField(field, val);
+          row.classList.toggle("done", val >= 1);
+          afterChange();
+        },
+        { compact: false }
+      );
+      ctrlWrap.appendChild(ctrl.node);
+      row.appendChild(ctrlWrap);
+
+      return row;
+    }
+
+    function afterChange() {
+      const done = Ops.isMockTestComplete();
+      paintStatus();
+
+      if (done && !wasComplete) {
+        Ops.toast("Full mock test complete.", "success");
+      } else if (!done && wasComplete) {
+        Ops.toast("Full mock test un-completed.", "info");
+      }
+      wasComplete = done;
+
+      if (window.Ops._refreshSync) window.Ops._refreshSync();
+    }
+
+    // ── info note ───────────────────────────────────────────────────────────
+    function noteBlock() {
+      const note = el("div", { class: "mock-note" });
+
+      const ic = el("div", { class: "note-icon" });
+      ic.innerHTML = Ops.icon("warning", 18);
+      note.appendChild(ic);
+
+      const body = el("div", { class: "note-body" });
+      body.innerHTML =
+        "<strong>No coins here.</strong> " +
+        "The Full Mock Test is a single global instance app-wide — it doesn't generate coins, " +
+        "only the completion status above. Counters are unlimited; 1× satisfies the requirement, " +
+        "so add more passes only if you actually sit more full mock exams.";
+      note.appendChild(body);
+
+      return note;
+    }
+  })();
+  </script>
+</body>
+</html>
