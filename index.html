@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+  <title>Ops Room</title>
+
+  <!-- Google Fonts (only external resource) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    /* ── page-scoped: auth screens ─────────────────────────────────────────── */
+    body { visibility: hidden; }
+
+    .auth-wrap {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 18px;
+      background:
+        radial-gradient(70% 55% at 50% 0%, rgba(0,212,170,0.07), transparent 60%),
+        var(--bg);
+    }
+    .auth-shell {
+      width: 100%;
+      max-width: 400px;
+    }
+    .auth-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+      text-align: center;
+    }
+    .auth-brand img {
+      height: 44px;
+      width: auto;
+    }
+    .auth-brand .wordmark {
+      font-family: var(--font-heading);
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      line-height: 1;
+    }
+    .auth-brand .tagline {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--gray);
+    }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+    .auth-card h1 {
+      font-size: 24px;
+      margin: 0 0 6px;
+    }
+    .auth-card .sub {
+      color: var(--gray2);
+      font-size: 13.5px;
+      margin: 0 0 22px;
+      line-height: 1.55;
+    }
+    .auth-actions {
+      margin-top: 6px;
+    }
+    .auth-actions .btn {
+      width: 100%;
+    }
+    .auth-foot {
+      text-align: center;
+      margin-top: 18px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--gray);
+      text-transform: uppercase;
+    }
+    .auth-switch {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--gray2);
+    }
+    .auth-switch button {
+      color: var(--accent);
+      font-weight: 600;
+      padding: 4px 2px;
+    }
+    .auth-switch button:hover {
+      color: var(--accent2);
+    }
+    .auth-state {
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--gray);
+    }
+    .auth-state .spinner { margin-bottom: 14px; }
+    .auth-state .msg { font-size: 13.5px; }
+  </style>
+</head>
+<body data-page="auth">
+
+  <main class="auth-wrap">
+    <div class="auth-shell">
+
+      <div class="auth-brand">
+        <img src="/images/logo.png" alt="Ops Room"
+             onerror="this.style.display='none'; document.getElementById('wordmark').style.display='block';" />
+        <div>
+          <div id="wordmark" class="wordmark" style="display:none;">Ops Room</div>
+          <div class="tagline">Admission Progress</div>
+        </div>
+      </div>
+
+      <div id="auth-slot" class="auth-card">
+        <div class="auth-state">
+          <div class="spinner" aria-hidden="true"></div>
+          <div class="msg">Checking account…</div>
+        </div>
+      </div>
+
+      <div class="auth-foot">Personal · Single user · No tracking</div>
+    </div>
+  </main>
+
+  <!-- shared scripts (no auth guard here — this IS the login page) -->
+  <script src="/syllabus.js"></script>
+  <script src="/core.js"></script>
+  <script src="/shared.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    const slot = document.getElementById("auth-slot");
+
+    // If already logged in, skip straight into the app.
+    // We don't block on server verification — a present token gets us in;
+    // core.js's requireAuth() will redirect out if the token turns out bad.
+    if (Ops.getToken()) {
+      // Fire-and-forget check; if it 401s, core.js's api() throws and we log out.
+      Ops.api("/auth/me")
+        .then(() => location.replace("dashboard.html"))
+        .catch((err) => {
+          if (err && err.status === 401) {
+            Ops.setToken(null);
+            Ops.setUsername(null);
+            render(); // fall through to normal auth flow
+          } else {
+            // Network error: token may still be valid. Let them in optimistically.
+            location.replace("dashboard.html");
+          }
+        });
+      return;
+    }
+
+    render();
+
+    function render() {
+      slot.innerHTML = "";
+      const state = el("div", { class: "auth-state" });
+      state.appendChild(el("div", { class: "spinner" }));
+      state.appendChild(el("div", { class: "msg", text: "Checking account…" }));
+      slot.appendChild(state);
+
+      Ops.api("/auth/status", { auth: false })
+        .then((res) => {
+          if (res && res.exists) renderLogin();
+          else renderSetup();
+        })
+        .catch(() => renderError("Could not reach the server. Check your connection and try again."));
+    }
+
+    // ── setup (first-ever run) ──────────────────────────────────────────────
+    function renderSetup() {
+      slot.innerHTML = "";
+
+      slot.appendChild(el("h1", { text: "Set up your account" }));
+      slot.appendChild(
+        el("p", {
+          class: "sub",
+          text: "This is the only account this app will ever have. Pick a username and a password you'll remember — there is no password reset.",
+        })
+      );
+
+      const form = el("form", { autocomplete: "off", novalidate: "novalidate" });
+
+      const fUser = field("Username", "text", "your-name");
+      const fPass = field("Password", "password", "At least 6 characters");
+      const fPass2 = field("Confirm password", "password", "Repeat password");
+
+      form.appendChild(fUser.wrap);
+      form.appendChild(fPass.wrap);
+      form.appendChild(fPass2.wrap);
+
+      const errLine = el("div", { class: "field-error" });
+      form.appendChild(errLine);
+
+      const actions = el("div", { class: "auth-actions" });
+      const btn = el("button", { class: "btn btn-primary", type: "submit", text: "Create account" });
+      actions.appendChild(btn);
+      form.appendChild(actions);
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        errLine.textContent = "";
+
+        const u = fUser.input.value.trim();
+        const p = fPass.input.value;
+        const p2 = fPass2.input.value;
+
+        if (u.length < 3) return (errLine.textContent = "Username must be at least 3 characters.");
+        if (p.length < 6) return (errLine.textContent = "Password must be at least 6 characters.");
+        if (p !== p2) return (errLine.textContent = "Passwords do not match.");
+
+        btn.disabled = true;
+        btn.textContent = "Creating…";
+
+        Ops.api("/auth/setup", { method: "POST", auth: false, body: { username: u, password: p } })
+          .then((res) => {
+            Ops.setToken(res.token);
+            Ops.setUsername(res.username);
+            location.replace("dashboard.html");
+          })
+          .catch((err) => {
+            btn.disabled = false;
+            btn.textContent = "Create account";
+            errLine.textContent = (err && err.message) || "Could not create account.";
+          });
+      });
+
+      slot.appendChild(form);
+      setTimeout(() => fUser.input.focus(), 30);
+    }
+
+    // ── login (subsequent runs) ─────────────────────────────────────────────
+    function renderLogin() {
+      slot.innerHTML = "";
+
+      slot.appendChild(el("h1", { text: "Welcome back" }));
+      slot.appendChild(el("p", { class: "sub", text: "Sign in to continue." }));
+
+      const form = el("form", { autocomplete: "off", novalidate: "novalidate" });
+
+      const fUser = field("Username", "text", "your-name");
+      const fPass = field("Password", "password", "Your password");
+
+      form.appendChild(fUser.wrap);
+      form.appendChild(fPass.wrap);
+
+      const errLine = el("div", { class: "field-error" });
+      form.appendChild(errLine);
+
+      const actions = el("div", { class: "auth-actions" });
+      const btn = el("button", { class: "btn btn-primary", type: "submit", text: "Sign in" });
+      actions.appendChild(btn);
+      form.appendChild(actions);
+
+      const hint = el("div", { class: "field-hint", text: "Forgot your password? See the README for how to reset it directly in the database." });
+      hint.style.marginTop = "14px";
+      form.appendChild(hint);
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        errLine.textContent = "";
+
+        const u = fUser.input.value.trim();
+        const p = fPass.input.value;
+
+        if (!u || !p) return (errLine.textContent = "Enter your username and password.");
+
+        btn.disabled = true;
+        btn.textContent = "Signing in…";
+
+        Ops.api("/auth/login", { method: "POST", auth: false, body: { username: u, password: p } })
+          .then((res) => {
+            Ops.setToken(res.token);
+            Ops.setUsername(res.username);
+            location.replace("dashboard.html");
+          })
+          .catch((err) => {
+            btn.disabled = false;
+            btn.textContent = "Sign in";
+            errLine.textContent = (err && err.message) || "Sign in failed.";
+          });
+      });
+
+      slot.appendChild(form);
+      setTimeout(() => fUser.input.focus(), 30);
+    }
+
+    // ── error ───────────────────────────────────────────────────────────────
+    function renderError(msg) {
+      slot.innerHTML = "";
+      const state = el("div", { class: "auth-state" });
+      state.appendChild(el("div", { class: "state-title", text: "Connection problem" }));
+      state.appendChild(el("div", { class: "state-body", text: msg }));
+      const retry = el("button", { class: "btn btn-ghost", type: "button", text: "Retry" });
+      retry.addEventListener("click", render);
+      state.appendChild(retry);
+      slot.appendChild(state);
+    }
+
+    // ── small helpers ───────────────────────────────────────────────────────
+    function field(labelText, type, placeholder) {
+      const wrap = el("div", { class: "field" });
+      const id = "f_" + Math.random().toString(36).slice(2, 8);
+      const label = el("label", { for: id, text: labelText });
+      const input = el("input", {
+        id,
+        class: "input",
+        type,
+        placeholder,
+        autocomplete: type === "password" ? "current-password" : "off",
+        spellcheck: "false",
+      });
+      wrap.appendChild(label);
+      wrap.appendChild(input);
+      return { wrap, input };
+    }
+
+    // Ops.boot() is NOT called on this page — this page is intentionally
+    // unauthenticated. Reveal the body now that layout is ready.
+    function reveal() {
+      document.body.style.visibility = "visible";
+    }
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(reveal, 0);
+    } else {
+      document.addEventListener("DOMContentLoaded", reveal);
+    }
+  })();
+  </script>
+</body>
+</html>
