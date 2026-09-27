@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#05080f" />
+  <meta name="color-scheme" content="dark" />
+  <title>Chapter · Ops Room</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    /* ── chapter-scoped ────────────────────────────────────────────────────── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray2);
+      margin-bottom: 12px;
+      transition: color var(--transition);
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .chap-head {
+      margin-bottom: 22px;
+    }
+    .chap-head .crumb {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--gray);
+      margin-bottom: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .chap-head .crumb a {
+      color: var(--gray2);
+      transition: color var(--transition);
+    }
+    .chap-head .crumb a:hover { color: var(--accent); }
+    .chap-head .crumb .sep {
+      color: var(--gray);
+      opacity: 0.6;
+    }
+    .chap-head h1 {
+      font-size: clamp(22px, 5.5vw, 32px);
+      line-height: 1.25;
+      margin: 0 0 6px;
+      font-weight: 600;
+    }
+    .chap-head .sub {
+      font-size: 13px;
+      color: var(--gray2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chap-status {
+      margin: 20px 0 22px;
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .chap-status.complete {
+      border-color: rgba(16, 212, 142, 0.45);
+      background: linear-gradient(180deg, var(--green-dim), var(--surface));
+    }
+    .chap-status .cs-ring {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      flex: 0 0 auto;
+      transition: color var(--transition), border-color var(--transition),
+        background var(--transition);
+    }
+    .chap-status.complete .cs-ring {
+      background: var(--green-dim);
+      border-color: rgba(16, 212, 142, 0.55);
+      color: var(--green);
+    }
+    .chap-status .cs-body {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .chap-status .cs-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 2px;
+      color: var(--white);
+    }
+    .chap-status .cs-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray);
+    }
+    .chap-status .cs-coin {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--orange);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      background: var(--orange-dim);
+      white-space: nowrap;
+    }
+
+    /* stage rows inherit .stage from style.css */
+    .stage-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .stage-helper {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gray);
+      letter-spacing: 0.02em;
+    }
+
+    .chap-foot {
+      margin-top: 26px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .chap-foot .btn { flex: 1 1 auto; min-width: 140px; }
+
+    @media (max-width: 520px) {
+      .stage {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .stage-control { align-self: flex-start; }
+      .stage-controls { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body data-page="subjects" class="booting">
+
+  <main class="app-content" id="app-view">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;color:var(--gray);">
+      <div class="spinner" aria-hidden="true"></div>
+      <div style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">
+        Loading chapter…
+      </div>
+    </div>
+  </main>
+
+  <script src="/syllabus.js"></script>
+  <script src="/core.js"></script>
+  <script src="/shared.js"></script>
+
+  <script>
+  (function () {
+    "use strict";
+
+    const view = document.getElementById("app-view");
+
+    if (!Ops.boot()) return;
+
+    // ── resolve chapter ─────────────────────────────────────────────────────
+    const chapterId = Ops.qs("id");
+    const chapter = chapterId ? Ops.findChapter(chapterId) : null;
+
+    if (!chapter) {
+      renderNotFound();
+      return;
+    }
+
+    const paper = Ops.findPaper(chapter.paperId);
+    const subject = Ops.findSubject(chapter.subjectId);
+
+    Ops.rememberOpened(chapter.id, "chapter");
+
+    // Live UI refs so we can re-render the status area without rebuilding
+    // the whole page on every counter click.
+    let statusHost = null;
+    let stageRows = {}; // { theory: {row, setDone}, revision: {row}, ... }
+    let wasComplete = Ops.isChapterComplete(chapter.id);
+
+    render();
+
+    // ── render ──────────────────────────────────────────────────────────────
+    function render() {
+      view.innerHTML = "";
+
+      view.appendChild(backLink());
+      view.appendChild(headBlock());
+
+      statusHost = document.createElement("div");
+      view.appendChild(statusHost);
+      paintStatus();
+
+      view.appendChild(stagesBlock());
+      view.appendChild(footBlock());
+    }
+
+    function backLink() {
+      const a = el("a", {
+        class: "back-link",
+        href: subject ? `subject.html?id=${encodeURIComponent(subject.id)}` : "dashboard.html",
+      });
+      a.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>`;
+      a.appendChild(
+        el("span", {
+          text: paper ? `Back to ${paper.name}` : "Back to subject",
+        })
+      );
+      return a;
+    }
+
+    function headBlock() {
+      const wrap = el("div", { class: "chap-head" });
+
+      // breadcrumb
+      const crumb = el("div", { class: "crumb" });
+      if (subject) {
+        const sLink = el("a", {
+          href: `subject.html?id=${encodeURIComponent(subject.id)}`,
+          text: subject.name,
+        });
+        crumb.appendChild(sLink);
+        crumb.appendChild(el("span", { class: "sep", text: "›" }));
+      }
+      if (paper) {
+        const pLink = el("a", {
+          href: `subject.html?id=${encodeURIComponent(subject.id)}&paper=${encodeURIComponent(paper.id)}`,
+          text: paper.name,
+        });
+        crumb.appendChild(pLink);
+        crumb.appendChild(el("span", { class: "sep", text: "›" }));
+      }
+      crumb.appendChild(el("span", { text: "Chapter" }));
+      wrap.appendChild(crumb);
+
+      wrap.appendChild(el("h1", { class: "bn", text: chapter.name }));
+
+      const sub = el("div", { class: "sub" });
+      const idx = paper ? paper.chapters.findIndex((c) => c.id === chapter.id) + 1 : 0;
+      if (idx > 0) {
+        sub.appendChild(el("span", { text: `Chapter ${idx} of ${paper.chapters.length}` }));
+      }
+      if (chapter.isCustom) {
+        sub.appendChild(el("span", { class: "pill custom", text: "Custom" }));
+      }
+      wrap.appendChild(sub);
+
+      return wrap;
+    }
+
+    // ── status block (re-rendered in place) ─────────────────────────────────
+    function paintStatus() {
+      statusHost.innerHTML = "";
+
+      const p = Ops.getChapterProgress(chapter.id);
+      const done = Ops.isChapterComplete(chapter.id);
+
+      const wrap = el("section", { class: "chap-status" + (done ? " complete" : "") });
+
+      const ring = el("div", { class: "cs-ring" });
+      ring.innerHTML = done ? Ops.icon("check", 22) : Ops.icon("chapter", 22);
+      wrap.appendChild(ring);
+
+      const body = el("div", { class: "cs-body" });
+      body.appendChild(
+        el("div", {
+          class: "cs-title",
+          text: done ? "Chapter complete" : "In progress",
+        })
+      );
+
+      const stagesDone =
+        (p.theory ? 1 : 0) +
+        (p.revision >= 1 ? 1 : 0) +
+        (p.qb >= 1 ? 1 : 0) +
+        (p.exam ? 1 : 0);
+      body.appendChild(
+        el("div", {
+          class: "cs-sub",
+          text: done ? "All four stages satisfied" : `${stagesDone} of 4 stages satisfied`,
+        })
+      );
+      wrap.appendChild(body);
+
+      if (done) {
+        const coin = el("div", { class: "cs-coin" });
+        coin.innerHTML = Ops.icon("coin", 14);
+        coin.appendChild(el("span", { text: "+1 coin earned" }));
+        wrap.appendChild(coin);
+      }
+
+      statusHost.appendChild(wrap);
+    }
+
+    // ── stages ──────────────────────────────────────────────────────────────
+    function stagesBlock() {
+      const wrap = el("div");
+      const p = Ops.getChapterProgress(chapter.id);
+
+      // Stage 1 — Theory + Concept Class (binary)
+      const s1 = stageShell(1, "Theory + Concept Class", "Mark as completed once you've covered the full theory class.");
+      const t1 = Ops.toggle(p.theory, (val) => {
+        Ops.setChapterField(chapter.id, "theory", val);
+        afterChange();
+        updateStageDone(s1, val);
+      });
+      s1.querySelector(".stage-control").appendChild(t1.node);
+      wrap.appendChild(s1);
+
+      // Stage 2 — Theory + Concept Revision + Active Recall (counter)
+      const s2 = stageShell(
+        2,
+        "Revision + Active Recall",
+        "Count each revision session that includes active recall."
+      );
+      const c2 = Ops.counter(p.revision, (val) => {
+        Ops.setChapterField(chapter.id, "revision", val);
+        afterChange();
+        updateStageDone(s2, val >= 1);
+      }, { compact: true });
+      const c2Wrap = s2.querySelector(".stage-control");
+      c2Wrap.appendChild(c2.node);
+      c2Wrap.appendChild(
+        el("span", {
+          class: "stage-helper",
+          text: p.revision >= 1 ? "≥1 required" : "at least 1 to count",
+        })
+      );
+      wrap.appendChild(s2);
+
+      // Stage 3 — Question Bank Solve (counter)
+      const s3 = stageShell(
+        3,
+        "Question Bank Solve",
+        "Count each question-bank pass on this chapter."
+      );
+      const c3 = Ops.counter(p.qb, (val) => {
+        Ops.setChapterField(chapter.id, "qb", val);
+        afterChange();
+        updateStageDone(s3, val >= 1);
+      }, { compact: true });
+      const c3Wrap = s3.querySelector(".stage-control");
+      c3Wrap.appendChild(c3.node);
+      c3Wrap.appendChild(
+        el("span", {
+          class: "stage-helper",
+          text: p.qb >= 1 ? "≥1 required" : "at least 1 to count",
+        })
+      );
+      wrap.appendChild(s3);
+
+      // Stage 4 — Daily Exam + Error Analysis (single combined binary)
+      const s4 = stageShell(
+        4,
+        "Daily Exam + Error Analysis",
+        "One toggle for both — done together or not at all."
+      );
+      const t4 = Ops.toggle(p.exam, (val) => {
+        Ops.setChapterField(chapter.id, "exam", val);
+        afterChange();
+        updateStageDone(s4, val);
+      });
+      s4.querySelector(".stage-control").appendChild(t4.node);
+      wrap.appendChild(s4);
+
+      // mark initial visual state for each stage
+      updateStageDone(s1, p.theory);
+      updateStageDone(s2, p.revision >= 1);
+      updateStageDone(s3, p.qb >= 1);
+      updateStageDone(s4, p.exam);
+
+      return wrap;
+    }
+
+    function stageShell(num, title, helper) {
+      const row = el("div", { class: "stage" });
+
+      const n = el("div", { class: "stage-num", text: String(num) });
+      row.appendChild(n);
+
+      const body = el("div", { class: "stage-body" });
+      body.appendChild(el("div", { class: "stage-title", text: title }));
+      body.appendChild(el("div", { class: "stage-sub", text: helper }));
+      row.appendChild(body);
+
+      const control = el("div", { class: "stage-control" });
+      row.appendChild(control);
+
+      return row;
+    }
+
+    function updateStageDone(row, done) {
+      row.classList.toggle("done", !!done);
+    }
+
+    // ── react to any stage change ───────────────────────────────────────────
+    function afterChange() {
+      const done = Ops.isChapterComplete(chapter.id);
+
+      // Refresh just the status block.
+      paintStatus();
+
+      // Coin toasts — only when the overall completion flips.
+      if (done && !wasComplete) {
+        Ops.toast("Chapter complete — +1 coin.", "success");
+      } else if (!done && wasComplete) {
+        Ops.toast("Chapter un-completed. Coin removed.", "info");
+      }
+      wasComplete = done;
+
+      // Nudge the header sync pill so it reflects unsynced state immediately.
+      if (window.Ops._refreshSync) window.Ops._refreshSync();
+    }
+
+    // ── foot actions ────────────────────────────────────────────────────────
+    function footBlock() {
+      const foot = el("div", { class: "chap-foot" });
+
+      const next = el("button", { class: "btn btn-ghost", type: "button" });
+      next.innerHTML = Ops.icon("chapter", 18);
+      next.appendChild(el("span", { text: "Next chapter" }));
+      next.addEventListener("click", () => {
+        const target = nextChapter();
+        if (target) location.href = `chapter.html?id=${encodeURIComponent(target.id)}`;
+        else Ops.toast("This is the last chapter in this paper.", "info");
+      });
+      foot.appendChild(next);
+
+      const back = el("a", {
+        class: "btn btn-primary",
+        href: subject ? `subject.html?id=${encodeURIComponent(subject.id)}` : "dashboard.html",
+      });
+      back.innerHTML = Ops.icon("check", 18);
+      back.appendChild(el("span", { text: "Done — back to subject" }));
+      foot.appendChild(back);
+
+      return foot;
+    }
+
+    function nextChapter() {
+      if (!paper) return null;
+      const i = paper.chapters.findIndex((c) => c.id === chapter.id);
+      if (i < 0 || i + 1 >= paper.chapters.length) return null;
+      return paper.chapters[i + 1];
+    }
+
+    // ── not found ───────────────────────────────────────────────────────────
+    function renderNotFound() {
+      view.innerHTML = "";
+      view.appendChild(
+        el("div", {
+          class: "state",
+          html: `
+            <div class="state-title">Chapter not found</div>
+            <div class="state-body">This chapter doesn't exist — it may have been removed.</div>
+          `,
+        })
+      );
+      const actions = el("div", { style: "margin-top: 16px; text-align:center;" });
+      const a = el("a", { class: "btn btn-primary", href: "dashboard.html" });
+      a.appendChild(el("span", { text: "Back to dashboard" }));
+      actions.appendChild(a);
+      view.appendChild(actions);
+    }
+  })();
+  </script>
+</body>
+</html>
