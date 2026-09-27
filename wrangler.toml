@@ -1,0 +1,25 @@
+# Ops Room — Cloudflare configuration
+# Replace nothing here except confirming the values match your account.
+# The D1 database ID below is YOUR real database ID (ops-db), not a placeholder.
+
+name = "ops-room"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "."
+
+# ── D1 binding ────────────────────────────────────────────────────────────────
+# Backend reads this as env.DB (see functions/api/[[route]].js).
+# Tables are created automatically on first API call via ensureTables().
+[[d1_databases]]
+binding = "DB"
+database_name = "ops-db"
+database_id = "b8e64dac-cfe9-4626-bea8-e57e396c6df9"
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+# JWT_SECRET is NOT set here. It must never be committed to source.
+# Set it once with:
+#     wrangler pages secret put JWT_SECRET
+# (Use a long random string, e.g. from: openssl rand -base64 48)
+#
+# For local dev with `wrangler pages dev`, create a .dev.vars file containing:
+#     JWT_SECRET="your-long-random-dev-secret"
+# and NEVER commit .dev.vars.
